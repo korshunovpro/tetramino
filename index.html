@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Game:Tetris</title>
+    <link href="https://fonts.googleapis.com/css?family=Press+Start+2P&amp;subset=cyrillic" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/tetris.css">
+    <link rel="stylesheet" href="assets/css/style-pocket.css">
+</head>
+<body>
+    <div id="tetris">
+        <div id="bucketWrapper">
+            <div class="btn" id="new" onclick="GAME.newGame('classic')"><span>new</span></div>
+            <div class="btn" id="pause"><span>pause</span></div>
+            <div class="btn hard" id="mode" onclick="GAME.newGame('hard')"><span>hard</span></div>
+            <!--<div class="btn" id="hi-score"><span>hi-score</span></div>-->
+            <div id="gameOver">Игра окончена!
+                <br>
+                <h5>Новый рекорд: <b class="value"></b>!!!</h5>
+            </div>
+        </div>
+        <div id="legend">
+            <div id="time">Time<br><span class="value">--:--:--</span></div>
+            <div id="level">Level<br><span class="value">---</span></div><br>
+            <div id="score">Score:<br><span class="value">------</span></div><br>
+            <div id="scoreHigh">Hi-score<br><span class="value">------</span></div><br>
+            <div id="line">Lines<br><span class="value">----</span></div><br>
+            <div id="bucketWrapperNext">
+                <p>Next figure</p>
+            </div>
+        </div>
+
+    </div>
+    <br>
+    <span class="key">&#8679;</span> - повернуть
+    <span class="key">&#8678;</span> - влево
+    <span class="key">	&#8680;</span> - враво
+    <span class="key">&#8681;</span> - ускорить
+    <span class="key">пробел</span> - сбросить фигуру вниз
+
+    <script src="src/tetris.js"></script>
+    <script>
+        GAME.init({
+            row: 20, col:10
+        });
+        GAME.newGame('classic');
+    </script>
+</body>
+</html>
