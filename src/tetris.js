@@ -19,12 +19,12 @@ let GAME = (function () {
         row: 20,
         //
         score: {
-            figure: 5,
-            line: 30
+            figure: [0, 0, 4, 8, 6],
+            line: 40
         },
         highScoreVar: 'tetrisHighScore',
         //
-        speed: 300
+        speed: 500
     };
 
     /**
@@ -276,9 +276,22 @@ let GAME = (function () {
      * @param cells
      */
     function eraseElement(bucketWrapperId, cells) {
-
         for (let r in cells) {
             for (let c in cells[r]) {
+                document.querySelector('#' + bucketWrapperId + ' tr:nth-child(' + r + ')' + ' td:nth-child(' + c + ')').innerHTML = "";
+                Game.fill[bucketWrapperId][r][c] = 0;
+            }
+        }
+    }
+
+    /**
+     * Удаление блоков фигуры из ячейки
+     * @param bucketWrapperId
+
+     */
+    function clear(bucketWrapperId) {
+        for (let r in Game.fill[bucketWrapperId]) {
+            for (let c in Game.fill[bucketWrapperId][r]) {
                 document.querySelector('#' + bucketWrapperId + ' tr:nth-child(' + r + ')' + ' td:nth-child(' + c + ')').innerHTML = "";
                 Game.fill[bucketWrapperId][r][c] = 0;
             }
@@ -313,6 +326,9 @@ let GAME = (function () {
     /*
      ----------- MOVE -----------
      */
+    /**
+     * Переворот фигуры
+     */
     function rotate() {
         if (!Game.next) {
             let newRotate = rotateFigure(Game.frame.figure.type);
@@ -325,6 +341,9 @@ let GAME = (function () {
 
     }
 
+    /**
+     * Перемещение влево
+     */
     function left() {
         if (!Game.next) {
             Game.frame.col--;
@@ -337,6 +356,9 @@ let GAME = (function () {
         }
     }
 
+    /**
+     * Перемещение вправо
+     */
     function right() {
         if (!Game.next) {
             Game.frame.col++;
@@ -349,6 +371,9 @@ let GAME = (function () {
         }
     }
 
+    /**
+     * Перемещение вниз
+     */
     function down() {
         Game.frame.row++;
         if (canDrawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.figure.cells)) {
@@ -408,6 +433,9 @@ let GAME = (function () {
         // figures
         Game.figures = Game.figures.concat(figuresList);
 
+        // очистка поля
+        clear(opt.bucketWrapperId);
+
         // set trigger
         Game.next = true;
 
@@ -417,13 +445,26 @@ let GAME = (function () {
 
 
     /**
-     * Start Game
+     * Start Game, основной цикл, начало новой фигуры
      */
     function start() {
-        Game.interval.main = setInterval(function() {
-            if (Game.next && !Game.pause && !Game.gameOver) {
 
+        showHighScore();
+        showTime();
+        Game.interval.timer = setInterval(function(){
+            if (!Game.pause) {
+                showTime();
+            }
+        }, 1000);
+
+        Game.interval.main = setInterval(function() {
+
+            if (Game.next && !Game.pause && !Game.gameOver) {
                 Game.frame.speed = opt.speed;
+
+                // установка уровня
+                showLevel();
+                showLine();
 
                 // установка текущей и следующей фигуры
 
@@ -454,20 +495,27 @@ let GAME = (function () {
         }, Math.round(opt.speed));
     }
 
+    /**
+     * Кадр
+     */
     function nextFrame() {
-        Game.next = false;
-        setTimeout(function() {
+        if (Game.frame.figure.type.length > 0) {
+            Game.next = false;
+            setTimeout(function() {
+                if(Game.pause) {
+                    nextFrame();
+                }
+                if(down()) {
+                    nextFrame();
+                } else {
+                    // очки
+                    Game.count.score += opt.score.figure[Game.frame.figure.type.length];
+                    showScore();
 
-            if(Game.pause) {
-                nextFrame();
-            }
-            if(down()) {
-                nextFrame();
-            } else {
-                Game.next = true;
-            }
-
-        }, Math.round(Game.frame.speed));
+                    Game.next = true;
+                }
+            }, Math.round(Game.frame.speed));
+        }
     }
 
     /**
@@ -500,8 +548,11 @@ let GAME = (function () {
         Game.frame.figureNext.type = [];
         Game.frame.figureNext.cells = [];
         Game.frame.speed = opt.speed;
+        Game.frame.offsetRow = 0;
+        Game.frame.offsetCol = 0;
 
         Game.pause = false;
+        Game.gameOver = false;
     }
 
     function gameOver() {
@@ -585,31 +636,17 @@ let GAME = (function () {
     }
 
     // key UP
-    function controlUp(e) {
-        e = e || window.event;
-        if (e.keyCode == '40') {// down arrow
-            speedNormal(e);
-        }
-    }
+    function controlUp(e) {}
 
     /*
      ------------------CONTROL actions---------------
      */
+    /**
+     * "Сброс" фигуры вниз
+     */
     function dropDown(e) {
         e.preventDefault();
         Game.frame.speed = 30;
-    }
-
-    function speedNormal(e) {
-        e.preventDefault();
-        Game.frame.speed = opt.speed;
-    }
-
-    function speedUp(e) {
-        e.preventDefault();
-        if (Game.frame.speed > 50 && !Game.pause) {
-            Game.frame.speed = Game.frame.speed / 4;
-        }
     }
 
     return _self;
