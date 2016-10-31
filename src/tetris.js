@@ -1,3 +1,7 @@
+/**
+ * @todo: привести типы в ячейках и проверке на заполнение в единый вид или bool или int
+ */
+
 let GAME = (function () {
 
     let _self = this;
@@ -27,7 +31,7 @@ let GAME = (function () {
      * Переменные во время игры
      */
     let Game = {
-        fill:{},
+        fill: {},
         interval: {
             main: null,
             timer: null,
@@ -47,11 +51,11 @@ let GAME = (function () {
             col: 1,
             figure: {
                 type: [],
-                cells: []
+                cells: {}
             },
             figureNext: {
-                type:[],
-                cells:[]
+                type: [],
+                cells: {}
             }
         },
         pause: false,
@@ -63,18 +67,17 @@ let GAME = (function () {
      * @type {[*]}
      */
     let figuresList = [
-        ['0000', '0110', '0110', '0000'],
-        ['0000', '1111', '0000', '0000'],
+        ['11', '11'], // O
+        ['0000', '1111', '0000', '0000'], // I
 
-        ['0000', '0011', '0110', '0000'],
-        ['0000', '0110', '0011', '0000'],
+        ['011', '110', '000'], // S
+        ['000', '110', '011'], // Z
 
-        ['0000', '0111', '0100', '0000'],
-        ['0000', '0111', '0001', '0000'],
+        ['100', '111', '000'], // L
+        ['000', '111', '001'], // J
 
-        ['0000', '0111', '0010', '0000'],
+        ['000', '111', '010'], // T
     ];
-
 
     /*
      ------------DRAWS function------------
@@ -140,6 +143,85 @@ let GAME = (function () {
     }
 
     /**
+     * "Призрак" нарисованной фигуры, если находится в краях, то пустые клетки- в минус
+     * @param figure
+     * @param row
+     * @param col
+     *
+     * @todo: внимательно посмотреть и переписать!
+     *
+     * @returns {{}}
+     */
+    function drawPrototype(figure, row, col) {
+        let cells = {};
+        let fillRow = false;
+        let fillCol = 0;
+        for (let i = 0, j = 2; i < figure.length; i++) {
+
+            let blockRow = row;
+            let blockRowCol = col;
+            let line = figure[i].split('');
+
+            if (row < 2 && !fillRow && figure[i].indexOf('1') < 0) {
+                blockRow = row - j;
+                j++;
+            } else {
+                fillRow = true;
+                blockRow = row;
+                row++;
+            }
+
+            blockRow = quote(blockRow);
+            cells[blockRow] = {};
+
+            for (let bl of line) {
+                if (bl == 1) {
+                    fillCol = true;
+                    cells[blockRow][blockRowCol] = 1;
+                }
+                else {
+                    cells[blockRow][blockRowCol] = 0;
+                }
+                blockRowCol++;
+            }
+        }
+
+        // sort by keys
+        let sortKeys = Object.keys(cells).sort(keySort);
+        let sortCells = {};
+        for (let k of sortKeys) {
+            sortCells[k] = cells[k];
+        }
+        return sortCells;
+    }
+
+    /**
+     *
+     * @param bucketWrapperId
+     * @param cells
+     * @param currentCells
+     * @returns {boolean}
+     */
+    function canDrawElement(bucketWrapperId, cells, currentCells) {
+        if (Game.frame.col < 1) return false;
+        for (let row in cells) {
+            for (let col in cells[row]) {
+                let rowInt = unquote(row);
+                let colInt = unquote(col);
+                if (rowInt >= 1 && colInt >= 1 && cells[row][col] === 1) {
+                    if (rowInt <= opt.row || colInt < opt.col) {
+                        if ( Game.fill[bucketWrapperId][rowInt][colInt] === false || (Game.fill[bucketWrapperId][rowInt][colInt] !== false && currentCells[row][col] === 1) ) {
+                            continue;
+                        }
+                    }
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
      * Рисует элемент в основном стакане
      * @param bucketWrapperId
      * @param cells
@@ -147,12 +229,13 @@ let GAME = (function () {
      */
     function drawElement(bucketWrapperId, cells) {
         for (let row in cells) {
-            if (cells.hasOwnProperty(row))  {
-                if (cells[row]) {
-                    for (let col of cells[row]) {
-                        Game.fill[bucketWrapperId][row][col] = true;
-                        draw(bucketWrapperId, row, col)
-                    }
+            for (let col in cells[row]) {
+                let rowInt = unquote(row);
+                let colInt = unquote(col);
+
+                if (rowInt >= 1 && colInt >= 1 && cells[row][col] === 1) {
+                    Game.fill[bucketWrapperId][rowInt][colInt] = true;
+                    draw(bucketWrapperId, rowInt, colInt);
                 }
             }
         }
@@ -165,57 +248,10 @@ let GAME = (function () {
      * @param y
      * @param x
      */
-    function draw (bucketWrapperId, y, x) {
+    function draw(bucketWrapperId, y, x) {
         let b = document.createElement('div');
         b.classList.add('block');
         document.querySelector('#' + bucketWrapperId + ' tr:nth-child(' + y + ')' + ' td:nth-child(' + x + ')').appendChild(b);
-    }
-
-    /**
-     * Проверка возможности отрисовать элемент
-     * @param bucketWrapperId
-     * @param figure
-     * @param row
-     * @param col
-     * @returns {*}
-     */
-    function canDrawElement(bucketWrapperId, figure, row, col) {
-
-        let count = figure.length;
-
-        //проверка линий снизу вверх, для отрисовки фигуры
-        row = (row+figure.length-1 > opt.row) ? opt.row : row+figure.length-1;
-
-        // if (figure[figure.length-1].indexOf('1') < 0) figure.pop();
-        // Game.frame.figure.type = figure;
-
-        let cells = {};
-        for (let i = figure.length-1; i >= 0; i--) {
-            let rowCol = col;
-            if (row > opt.row) return false;
-
-            let line = figure[i];
-            line = line.split('');
-
-            cells[row] = [];
-            for (let bl of line) {
-                if (rowCol > opt.col || rowCol < 1) return false;
-
-                if (bl == 1) {
-                    if (
-                        ( (typeof Game.frame.figure.cells[row] === "undefined") || Game.frame.figure.cells[row][rowCol] === false)
-                        && (typeof Game.fill[bucketWrapperId][row] !== "undefined" && Game.fill[bucketWrapperId][row][rowCol] === true)
-                    ) {
-                        cells = null;
-                        return false;
-                    }
-                    cells[row].push(rowCol);
-                }
-                rowCol++;
-            }
-            row--;
-        }
-        return cells;
     }
 
     /**
@@ -225,12 +261,13 @@ let GAME = (function () {
      */
     function eraseElement(bucketWrapperId, cells) {
         for (let row in cells) {
-            if (cells.hasOwnProperty(row))  {
-                if (cells[row]) {
-                    for (let col of cells[row]) {
-                        Game.fill[bucketWrapperId][row][col] = false;
-                        document.querySelector('#' + bucketWrapperId + ' tr:nth-child(' + row + ')' + ' td:nth-child(' + col + ')').innerHTML = "";
-                    }
+            for (let col in cells[row]) {
+                let rowInt = unquote(row);
+                let colInt = unquote(col);
+
+                if (rowInt >= 1 && colInt >=1) {
+                    Game.fill[bucketWrapperId][rowInt][colInt] = false;
+                    document.querySelector('#' + bucketWrapperId + ' tr:nth-child(' + rowInt + ')' + ' td:nth-child(' + colInt + ')').innerHTML = "";
                 }
             }
         }
@@ -238,32 +275,99 @@ let GAME = (function () {
     }
 
     /**
-     * Переворачивает фигуру count раз
+     * Поворачивает фигуру
      * @param figure
      * @returns {*}
      */
     function rotateFigure(figure) {
-
+        /*SRS - rotation system, http://strategywiki.org/wiki/File:Tetris_rotation_super.png*/
         let col = figure[0].length;
         let row = figure.length;
-        let rotateFigure = [];
+        let rotateFigure = figure;
 
-        for (let r = row-1; r >= 0 ; r--) {
-            for (let c = 0; c < col; c++) {
-                let line = figure[r].split('');
-                if (row == 4) {
-                    let l = line.shift();
-                    line.push(l);
+        for (let l = 0; l < 1; l++) {
+            rotateFigure = [];
+            for (let r = row-1; r >= 0 ; r--) {
+                for (let c = 0; c < col; c++) {
+                    let line = figure[r].split('');
+                    (!rotateFigure[c]) ? rotateFigure[c] = line[c].toString() : rotateFigure[c] += line[c];
                 }
-                (!rotateFigure[c]) ? rotateFigure[c] = line[c].toString() : rotateFigure[c] += line[c].toString();
             }
         }
         return rotateFigure;
     }
 
     /*
+     ----------- MOVE -----------
+     */
+    function rotate() {
+        let rotate = rotateFigure(Game.frame.figure.type);
+        let cells = drawPrototype(rotate, Game.frame.row, Game.frame.col);
+        if(canDrawElement(opt.bucketWrapperId, cells, Game.frame.figure.cells)) {
+            eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
+            drawElement(opt.bucketWrapperId, cells);
+            Game.frame.figure.type = rotate;
+            Game.frame.figure.cells = cells;
+        } else {
+            Game.frame.col++;
+        }
+    }
+
+    function left() {
+        Game.frame.col--;
+        let cells = drawPrototype(Game.frame.figure.type, Game.frame.row, Game.frame.col);
+        if(canDrawElement(opt.bucketWrapperId, cells, Game.frame.figure.cells)) {
+            eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
+            drawElement(opt.bucketWrapperId, cells);
+            Game.frame.figure.cells = cells;
+        } else {
+            Game.frame.col++;
+        }
+    }
+
+    function right() {
+        Game.frame.col++;
+        let cells = drawPrototype(Game.frame.figure.type, Game.frame.row, Game.frame.col);
+        if(canDrawElement(opt.bucketWrapperId, cells, Game.frame.figure.cells)) {
+            eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
+            drawElement(opt.bucketWrapperId, cells);
+            Game.frame.figure.cells = cells;
+        } else {
+            Game.frame.col--;
+        }
+    }
+
+    function down() {
+        Game.frame.row++;
+        let cells = drawPrototype(Game.frame.figure.type, Game.frame.row, Game.frame.col);
+        if(canDrawElement(opt.bucketWrapperId, cells, Game.frame.figure.cells)) {
+            eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
+            drawElement(opt.bucketWrapperId, cells);
+            Game.frame.figure.cells = cells;
+        } else {
+            Game.frame.row--;
+        }
+    }
+
+    /*
+     ----------- / MOVE -----------
+     */
+
+    /*
      ------------------draw helpers---------------
      */
+
+    function keySort(a, b) {
+        return unquote(a) > unquote(b);
+    }
+
+    function quote(val) {
+        return '"' + val + '"';
+    }
+
+    function unquote(val) {
+        return parseInt(val.replace(/\"/gi, ''))
+    }
 
     /**
      * "Центральная" линия/колонка
@@ -292,10 +396,10 @@ let GAME = (function () {
     function getRandomFigure() {
         return Game.figures[getRandomInt(0, (Game.figures.length - 1))];
     }
+
     /*
      ------------/ DRAWS function------------
      */
-
 
     /**
      * Старт новой игры
@@ -307,19 +411,40 @@ let GAME = (function () {
 
         // figures
         Game.figures = Game.figures.concat(figuresList);
-        if (mode != 'classic') {
-            Game.figures = Game.figures.concat(figuresListExt);
-        }
 
         // set trigger
         Game.next = true;
-        Game.frame.figure.type = getRandomFigure();
+        Game.frame.figure.type = figuresList[0];//Game.figures[getRandomInt(0,1)];// getRandomFigure();
+        //Game.frame.figure.type = getRandomFigure();
 
-        // Game.frame.row++;
-        // Game.frame.col++;
+        console.log(Game.frame.figure.type);
+        console.log(rotateFigure(Game.frame.figure.type));
+        console.log(rotateFigure(rotateFigure(Game.frame.figure.type)));
+        console.log(rotateFigure(rotateFigure(rotateFigure(Game.frame.figure.type))));
+        console.log(rotateFigure(rotateFigure(rotateFigure(rotateFigure(Game.frame.figure.type)))));
 
-        if (Game.frame.figure.cells = canDrawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col)) {
-            drawElement(opt.bucketWrapperId, Game.frame.figure.cells);
+        return;
+
+
+
+
+        let cells = drawPrototype(Game.frame.figure.type, Game.frame.row, Game.frame.col);
+        console.log(cells)
+        if(canDrawElement(opt.bucketWrapperId, cells, Game.frame.figure.cells)) {
+            Game.frame.figure.cells = cells;
+            drawElement(opt.bucketWrapperId, cells);
+        }
+
+
+
+        //Game.frame.figure.type = rotateFigure(Game.frame.figure.type);
+
+
+        cells = rotateFigure(cells);
+
+        if(canDrawElement(opt.bucketWrapperId, cells, Game.frame.figure.cells)) {
+            drawElement(opt.bucketWrapperId, cells);
+            Game.frame.figure.cells = cells;
         }
 
         //start();
@@ -329,9 +454,11 @@ let GAME = (function () {
     /**
      * Start Game
      */
-    function start() {}
+    function start() {
+    }
 
-    function nextFrame() {}
+    function nextFrame() {
+    }
 
     /**
      * Сброс игры
@@ -382,7 +509,7 @@ let GAME = (function () {
         document.onkeyup = controlUp;
 
         for (let op in settings) {
-            if(opt.hasOwnProperty(op)) {
+            if (opt.hasOwnProperty(op)) {
                 opt[op] = settings[op];
             }
         }
@@ -410,18 +537,20 @@ let GAME = (function () {
     function showLine() {
         document.querySelector('#line .value').innerText = ('000' + Game.count.line).slice(-4);
     }
+
     function showTime() {
         Game.count.timer++;
-        let h = (Game.count.timer > 3599) ? Math.round(Game.count.timer/3600) : 0;
-        let m = (Game.count.timer > 59) ? (Math.round((Game.count.timer - h*3600)/60)) : 0;
-        let s = Math.round(((Game.count.timer - h*3600) - m*60));
-        document.querySelector('#time .value').innerText = ('0' + h).slice(-2) + ':' + ('0' + m).slice(-2) + ':'+ ('0' + s).slice(-2) ;
+        let h = (Game.count.timer > 3599) ? Math.round(Game.count.timer / 3600) : 0;
+        let m = (Game.count.timer > 59) ? (Math.round((Game.count.timer - h * 3600) / 60)) : 0;
+        let s = Math.round(((Game.count.timer - h * 3600) - m * 60));
+        document.querySelector('#time .value').innerText = ('0' + h).slice(-2) + ':' + ('0' + m).slice(-2) + ':' + ('0' + s).slice(-2);
     }
 
 
     /*
      ------------------CONTROL events---------------
      */
+    // key DOWN
     function controlDown(e) {
         e = e || window.event;
         if (e.keyCode == '40') {// down arrow
@@ -440,11 +569,12 @@ let GAME = (function () {
             e.preventDefault();
             right();
         }
-        else if ( (e.keyCode === 0 || e.keyCode === 32) && !Game.pause) {// space
+        else if ((e.keyCode === 0 || e.keyCode === 32) && !Game.pause) {// space
             dropDown(e);
         }
     }
 
+    // key UP
     function controlUp(e) {
         e = e || window.event;
         if (e.keyCode == '40') {// down arrow
@@ -469,64 +599,6 @@ let GAME = (function () {
         e.preventDefault();
         if (Game.frame.speed > 50 && !Game.pause) {
             Game.frame.speed = Game.frame.speed / 4;
-        }
-    }
-
-
-    function left() {
-        Game.frame.col--;
-
-        let cells = canDrawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col);
-        if (cells) {
-            eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
-            Game.frame.figure.cells = cells;
-            drawElement(opt.bucketWrapperId, Game.frame.figure.cells);
-        } else {
-            Game.frame.col++
-        }
-    }
-
-    function right() {
-        Game.frame.col++;
-        let cells = canDrawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col);
-        if (cells) {
-            eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
-            Game.frame.figure.cells = cells;
-            drawElement(opt.bucketWrapperId, Game.frame.figure.cells);
-        } else {
-            Game.frame.col--
-        }
-    }
-
-    function down() {
-        Game.frame.row++;
-        if (Game.frame.row > opt.row) {
-            Game.frame.row = opt.row;
-        }
-        let cells = canDrawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col);
-        if (cells) {
-            eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
-            Game.frame.figure.cells = cells;
-            drawElement(opt.bucketWrapperId, Game.frame.figure.cells);
-        } else {
-            Game.frame.row--
-        }
-    }
-
-    /**
-     * Rotate
-     */
-    function rotate() {
-        if (Game.frame.row < 2 && Game.frame.figure.type[0].indexOf('111') >= 0) return false;
-
-        let rotate = rotateFigure(Game.frame.figure.type, 1);
-
-        let cells = canDrawElement(opt.bucketWrapperId, rotate, Game.frame.row, Game.frame.col);
-        if (cells) {
-            Game.frame.figure.type = rotate;
-            eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
-            Game.frame.figure.cells = cells;
-            drawElement(opt.bucketWrapperId, Game.frame.figure.cells);
         }
     }
 
