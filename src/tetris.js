@@ -39,8 +39,7 @@ let GAME = (function () {
         interval: {
             main: null,
             timer: null,
-            pause: false,
-            drop: false
+            pause: false
         },
         figures: [],
         count: {
@@ -457,12 +456,13 @@ let GAME = (function () {
     _self.newGame = function (mode) {
 
         gameReset();
+        // очистка поля
+        clear(opt.bucketWrapperId);
+
+        clear(opt.bucketNextWrapperId);
 
         // figures
         Game.figures = Game.figures.concat(figuresList);
-
-        // очистка поля
-        clear(opt.bucketWrapperId);
 
         // set trigger
         Game.next = true;
@@ -476,7 +476,6 @@ let GAME = (function () {
      * Start Game, основной цикл, начало новой фигуры
      */
     function start() {
-
 
         showScore();
         showLine();
@@ -542,7 +541,7 @@ let GAME = (function () {
                 nextFrame();
             }
 
-        }, Math.round(opt.speed/2));
+        }, Math.round(opt.speed));
     }
 
     /**
@@ -552,13 +551,12 @@ let GAME = (function () {
         if (Game.frame.figure.type.length > 0) {
             Game.next = false;
             setTimeout(function() {
-
                 //
                 if(Game.pause) {
                     nextFrame();
                 }
                 //
-                else if(down()) {
+                else if(Game.interval.main && down()) {
                     nextFrame();
                 }
                 //
@@ -582,13 +580,11 @@ let GAME = (function () {
                     showScore();
 
                     // следующая фигура
-                    console.log(Game.frame.row)
-                    if (Game.frame.row <= 2) {
+                    if (Game.frame.figure.type.length && Game.frame.row <= 2) {
                         gameOver();
                     } else {
                         Game.next = true;
                     }
-
                     return false
                 }
             }, Math.round(Game.frame.speed));
@@ -603,13 +599,18 @@ let GAME = (function () {
         // clear intervals
         if (Game.interval.main) {
             clearInterval(Game.interval.main);
+            Game.interval.main = null;
         }
         if (Game.interval.timer) {
             clearInterval(Game.interval.timer);
+            Game.interval.timer = null;
         }
         if (Game.interval.pause) {
             clearInterval(Game.interval.pause);
+            Game.interval.pause = null;
         }
+
+        Game.figures = [];
 
         // reset counter
         Game.count.element = 0;
@@ -630,6 +631,7 @@ let GAME = (function () {
         Game.frame.offsetCol = 0;
 
         Game.pause = false;
+        Game.next = true;
         Game.gameOver = false;
     }
 
