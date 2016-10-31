@@ -339,7 +339,7 @@ let GAME = (function () {
      * Переворот фигуры
      */
     function rotate() {
-        if (!Game.next) {
+        if (!Game.next && !Game.pause) {
             let newRotate = rotateFigure(Game.frame.figure.type);
             if (canDrawElement(opt.bucketWrapperId, newRotate, Game.frame.row, Game.frame.col, Game.frame.figure.cells)) {
                 eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
@@ -354,7 +354,7 @@ let GAME = (function () {
      * Перемещение влево
      */
     function left() {
-        if (!Game.next) {
+        if (!Game.next && !Game.pause) {
             Game.frame.col--;
             if (canDrawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.figure.cells)) {
                 eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
@@ -369,7 +369,7 @@ let GAME = (function () {
      * Перемещение вправо
      */
     function right() {
-        if (!Game.next) {
+        if (!Game.next && !Game.pause) {
             Game.frame.col++;
             if (canDrawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.figure.cells)) {
                 eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
@@ -384,7 +384,7 @@ let GAME = (function () {
      * Перемещение вниз
      */
     function down() {
-        if (!Game.next) {
+        if (!Game.next && !Game.pause) {
             Game.frame.row++;
             if (canDrawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.figure.cells)) {
                 eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
@@ -647,6 +647,19 @@ let GAME = (function () {
         gameReset();
     }
 
+    _self.pause = function () {
+        Game.pause = !Game.pause;
+        if (!Game.pause) {
+            clearInterval(Game.interval.pause);
+            document.querySelector('#pause').classList.remove('blink');
+        } else {
+            document.querySelector('#pause').classList.add('blink');
+            Game.interval.pause = setInterval(function(){
+                document.querySelector('#pause').classList.toggle('blink');
+            }, 300);
+        }
+    };
+
     /**
      * Init
      */
@@ -727,6 +740,10 @@ let GAME = (function () {
         }
         else if ((e.keyCode === 0 || e.keyCode === 32) && !Game.pause) {// space
             dropDown(e);
+        }
+        else if (e.keyCode == '80') {// right
+            e.preventDefault();
+            _self.pause();
         }
     }
 

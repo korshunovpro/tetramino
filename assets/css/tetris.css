@@ -1,7 +1,6 @@
 html {
     height: 100%;
     min-width: 960px;
-    background: rgba(0,89,165,1); /* Old browsers */
 }
 
 body {
@@ -13,6 +12,7 @@ body {
     width:100%;
     min-width: 1000px;
     background: #fff;
+    padding-top:100px;
 }
 
 .clear {
@@ -21,6 +21,9 @@ body {
 
 h1 {
     font-weight:normal;
+    padding-top:50px;
+    margin-bottom:50px;
+    font-size:18px;
 }
 
 p {
@@ -29,7 +32,7 @@ p {
 }
 
 #legend {
-    padding-top:50px;
+
 }
 
 #legend, #bucketWrapperNext {
@@ -38,6 +41,7 @@ p {
     margin:70px 0;
     width:250px;
     text-align: left;
+    position: relative;
 }
 
 #bucketWrapper, #bucketWrapperNext {
@@ -62,31 +66,12 @@ table.bucket {
 }
 table.bucket td,
 table.bucketNext td {
-    width:28px;
-    height:28px;
+    width:15px;
+    height:15px;
     border: 1px solid #DDDDDD;/**/
     background: none;
     position: relative;
 }
-
-/*
-table.bucket td:after {
-    content: "";
-    display:block;
-    position: absolute;
-    width:4px;
-    opacity: 0.3;
-    height:4px;
-    background: #fff;
-    border-radius: 3px;
-    left: 50%;
-    margin-left:-2px;
-    top: 50%;
-    margin-top:-2px;
-    z-index:1;
-}
-*/
-
 
 .block {
     position: absolute;
@@ -122,10 +107,6 @@ table.bucketNext td {
 #gameOver h5 {
     display: none;
     font-weight:normal;
-}
-
-tr.blink div {
-    opacity: 0.3;
 }
 
 .btn {

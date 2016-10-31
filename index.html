@@ -2,24 +2,25 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Game:Tetris</title>
+    <title>Game:Tetris Classic</title>
     <link href="https://fonts.googleapis.com/css?family=Press+Start+2P&amp;subset=cyrillic" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/tetris.css">
     <link rel="stylesheet" href="assets/css/style-pocket.css">
 </head>
 <body>
     <div id="tetris">
-        <div id="bucketWrapper">
+        <div id="controls">
             <div class="btn" id="new" onclick="GAME.newGame('classic')"><span>new</span></div>
-            <div class="btn" id="pause"><span>pause</span></div>
-            <div class="btn hard" id="mode" onclick="GAME.newGame('hard')"><span>hard</span></div>
-            <!--<div class="btn" id="hi-score"><span>hi-score</span></div>-->
+            <div class="btn" id="pause" onclick="GAME.pause()"><span>pause</span></div>
+        </div>
+        <div id="bucketWrapper">
             <div id="gameOver">Игра окончена!
                 <br>
                 <h5>Новый рекорд: <b class="value"></b>!!!</h5>
             </div>
         </div>
         <div id="legend">
+            <h1>Tetris: classic</h1>
             <div id="time">Time<br><span class="value">--:--:--</span></div>
             <div id="level">Level<br><span class="value">---</span></div><br>
             <div id="score">Score:<br><span class="value">------</span></div><br>

@@ -7,10 +7,11 @@ body {
 }
 
 h1 {
-    font-size:24px;
+    font-size:22px;
     font-weight:normal;
     margin-top:0;
-    margin-bottom:20px;
+    padding-top:20px;
+    margin-bottom:40px;
 }
 
 .value {
@@ -27,9 +28,9 @@ table.bucket {
 
 table.bucket td,
 table.bucketNext td {
+    width:28px;
+    height:28px;
     border-radius: 1px;
-    width:30px;
-    height:30px;
     border: 1px solid #b2b2b2;
 }
 
@@ -89,6 +90,6 @@ table.bucketNext td:after {
     text-transform: uppercase;
 }
 
-div.blink {
-    opacity:0.5;
+.blink {
+    opacity:0.6;
 }
