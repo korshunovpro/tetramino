@@ -22,6 +22,8 @@ let GAME = (function () {
             figure: [0, 0, 4, 8, 6],
             line: 40
         },
+        levelUp:1000,
+        levelTime:5,
         highScoreVar: 'tetrisHighScore',
         //
         speed: 500
@@ -72,15 +74,15 @@ let GAME = (function () {
     let figuresList = [
         [[1, 1], [1, 1]], // O
 
-        [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]], // I
-
-        [[0, 1, 1], [1, 1, 0], [0, 0, 0]], // S
-        [[0, 0, 0], [1, 1, 0], [0, 1, 1]], // Z
-
-        [[1, 0, 0], [1, 1, 1], [0, 0, 0]], // L
-        [[0, 0, 0], [1, 1, 1], [0, 0, 1]], // J
-
-        [[0, 0, 0], [1, 1, 1], [0, 1, 0]], // T
+        // [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]], // I
+        //
+        // [[0, 1, 1], [1, 1, 0], [0, 0, 0]], // S
+        // [[0, 0, 0], [1, 1, 0], [0, 1, 1]], // Z
+        //
+        // [[1, 0, 0], [1, 1, 1], [0, 0, 0]], // L
+        // [[0, 0, 0], [1, 1, 1], [0, 0, 1]], // J
+        //
+        // [[0, 0, 0], [1, 1, 1], [0, 1, 0]], // T
     ];
 
     /*
@@ -188,6 +190,9 @@ let GAME = (function () {
      *
      * @param bucketWrapperId
      * @param figure
+     * @param row
+     * @param col
+     * @param currentFigureCells
      *
      * @returns {boolean}
      */
@@ -418,6 +423,23 @@ let GAME = (function () {
         return Game.figures[getRandomInt(0, (Game.figures.length - 1))];
     }
 
+    /**
+     * Проверка что все ячейки заполнены
+     * @param obj
+     * @param value
+     * @returns {*}
+     */
+    function checkValueInObject(obj, value) {
+        for( let key in obj ) {
+            if( obj.hasOwnProperty( key ) ) {
+                if( obj[key] === value ) {
+                    return key;
+                }
+            }
+        }
+        return false;
+    }
+
     /*
      ------------/ DRAWS function------------
      */
@@ -463,8 +485,12 @@ let GAME = (function () {
                 Game.frame.speed = opt.speed;
 
                 // установка уровня
+                if (Game.count.score >= opt.levelUp ) {
+                    let levels = Math.floor(Game.count.score/opt.levelUp);
+                    Game.count.level = 1 + levels;
+                    Game.frame.speed = opt.speed - (levels * (opt.levelTime - opt.levelTime));
+                }
                 showLevel();
-                showLine();
 
                 // установка текущей и следующей фигуры
 
@@ -511,6 +537,20 @@ let GAME = (function () {
                     // очки
                     Game.count.score += opt.score.figure[Game.frame.figure.type.length];
                     showScore();
+
+                    let count = 0;
+                    for (let i = ((Game.frame.row - Game.frame.offsetRow) + Game.frame.figure.type.length) - 1; i >= Game.frame.row - Game.frame.offsetRow ; i--) {
+                        // if (typeof Game.fill[opt.bucketWrapperId][i] !== 'undefined' && !checkValueInObject(Game.fill[opt.bucketWrapperId][i], 0) ) {
+                        //     lineDestroy(opt.bucketWrapperId, i, count);
+                        //     console.log(i+count)
+                        //     count++;
+                        // }
+                    }
+
+                    // Game.count.line += count;
+                    // Game.count.score += ((Game.count.level * opt.score.line) * count);
+                    // showLine();
+                    // showScore();
 
                     Game.next = true;
                 }
@@ -632,6 +672,7 @@ let GAME = (function () {
         }
         else if ((e.keyCode === 0 || e.keyCode === 32) && !Game.pause) {// space
             dropDown(e);
+            down();
         }
     }
 
