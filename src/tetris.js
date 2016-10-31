@@ -49,6 +49,8 @@ let GAME = (function () {
             speed: opt.speed,
             row: 1,
             col: 1,
+            offsetRow: 0,
+            offsetCol: 0,
             figure: {
                 type: [],
                 cells: {}
@@ -67,16 +69,17 @@ let GAME = (function () {
      * @type {[*]}
      */
     let figuresList = [
-        ['11', '11'], // O
-        ['0000', '1111', '0000', '0000'], // I
+        [[1,1], [1,1]], // O
 
-        ['011', '110', '000'], // S
-        ['000', '110', '011'], // Z
+        [[0,0,0,0], [1,1,1,1], [0,0,0,0], [0,0,0,0]], // I
 
-        ['100', '111', '000'], // L
-        ['000', '111', '001'], // J
+        [[0,1,1], [1,1,0], [0,0,0]], // S
+        [[0,0,0], [1,1,0], [0,1,1]], // Z
 
-        ['000', '111', '010'], // T
+        [[1,0,0], [1,1,1], [0,0,0]], // L
+        [[0,0,0], [1,1,1], [0,0,1]], // J
+
+        [[0,0,0], [1,1,1], [0,1,0]], // T
     ];
 
     /*
@@ -88,10 +91,9 @@ let GAME = (function () {
      * @param bucketWrapperId
      * @param row
      * @param col
-     * @param fill
      * @returns {boolean}
      */
-    function drawBucket(bucketWrapperId, row, col, fill) {
+    function drawBucket(bucketWrapperId, row, col) {
         if (bucketWrapperId) {
             Game.fill[bucketWrapperId] = {};
             let bucket = document.createElement('table');
@@ -143,81 +145,49 @@ let GAME = (function () {
     }
 
     /**
-     * "Призрак" нарисованной фигуры, если находится в краях, то пустые клетки- в минус
+     * Пустые строки сверху и столбцы слева при первой отрисовке фигуры
      * @param figure
-     * @param row
-     * @param col
-     *
-     * @todo: внимательно посмотреть и переписать!
-     *
-     * @returns {{}}
      */
-    function drawPrototype(figure, row, col) {
-        let cells = {};
-        let fillRow = false;
-        let fillCol = 0;
-        for (let i = 0, j = 2; i < figure.length; i++) {
+    function drawInitOffset(figure) {
 
-            let blockRow = row;
-            let blockRowCol = col;
-            let line = figure[i].split('');
+        let setOffsetRow = false;
+        let setOffsetCol = false;
 
-            if (row < 2 && !fillRow && figure[i].indexOf('1') < 0) {
-                blockRow = row - j;
-                j++;
-            } else {
-                fillRow = true;
-                blockRow = row;
-                row++;
+        let offset = {
+            offsetRow:0,
+            offsetCol:0
+        };
+
+        // rows
+        for (let i = 0; i < figure.length; i++) {
+            // row offset
+            if (figure[i].indexOf(1) >= 0 && !setOffsetRow && Game.frame.offsetRow < 1) {
+                setOffsetRow = true;
+                offset.offsetRow = i;
             }
 
-            blockRow = quote(blockRow);
-            cells[blockRow] = {};
-
-            for (let bl of line) {
-                if (bl == 1) {
-                    fillCol = true;
-                    cells[blockRow][blockRowCol] = 1;
+            // cols
+            for (let j = 0; j < figure[i].length; j++ ) {
+                // col offset
+                if (figure[i][j] == 1 && !setOffsetCol && Game.frame.offsetCol < 1) {
+                    setOffsetCol = true;
+                    offset.offsetCol = j;
                 }
-                else {
-                    cells[blockRow][blockRowCol] = 0;
-                }
-                blockRowCol++;
             }
         }
-
-        // sort by keys
-        let sortKeys = Object.keys(cells).sort(keySort);
-        let sortCells = {};
-        for (let k of sortKeys) {
-            sortCells[k] = cells[k];
-        }
-        return sortCells;
+        return offset;
     }
 
     /**
-     *
      * @param bucketWrapperId
-     * @param cells
-     * @param currentCells
+     * @param figure
+     *
+     * @todo: Проверка что новая позиция не попадает на клетки занятые текущей фигурой
+     *
      * @returns {boolean}
      */
-    function canDrawElement(bucketWrapperId, cells, currentCells) {
-        if (Game.frame.col < 1) return false;
-        for (let row in cells) {
-            for (let col in cells[row]) {
-                let rowInt = unquote(row);
-                let colInt = unquote(col);
-                if (rowInt >= 1 && colInt >= 1 && cells[row][col] === 1) {
-                    if (rowInt <= opt.row || colInt < opt.col) {
-                        if ( Game.fill[bucketWrapperId][rowInt][colInt] === false || (Game.fill[bucketWrapperId][rowInt][colInt] !== false && currentCells[row][col] === 1) ) {
-                            continue;
-                        }
-                    }
-                    return false;
-                }
-            }
-        }
+    function canDrawElement(bucketWrapperId, figure, row, col) {
+
         return true;
     }
 
@@ -228,17 +198,7 @@ let GAME = (function () {
      * @returns {*}
      */
     function drawElement(bucketWrapperId, cells) {
-        for (let row in cells) {
-            for (let col in cells[row]) {
-                let rowInt = unquote(row);
-                let colInt = unquote(col);
 
-                if (rowInt >= 1 && colInt >= 1 && cells[row][col] === 1) {
-                    Game.fill[bucketWrapperId][rowInt][colInt] = true;
-                    draw(bucketWrapperId, rowInt, colInt);
-                }
-            }
-        }
         return cells;
     }
 
@@ -260,17 +220,7 @@ let GAME = (function () {
      * @param cells
      */
     function eraseElement(bucketWrapperId, cells) {
-        for (let row in cells) {
-            for (let col in cells[row]) {
-                let rowInt = unquote(row);
-                let colInt = unquote(col);
 
-                if (rowInt >= 1 && colInt >=1) {
-                    Game.fill[bucketWrapperId][rowInt][colInt] = false;
-                    document.querySelector('#' + bucketWrapperId + ' tr:nth-child(' + rowInt + ')' + ' td:nth-child(' + colInt + ')').innerHTML = "";
-                }
-            }
-        }
         return cells;
     }
 
@@ -283,14 +233,16 @@ let GAME = (function () {
         /*SRS - rotation system, http://strategywiki.org/wiki/File:Tetris_rotation_super.png*/
         let col = figure[0].length;
         let row = figure.length;
-        let rotateFigure = figure;
+        let rotateFigure = [];
 
         for (let l = 0; l < 1; l++) {
             rotateFigure = [];
-            for (let r = row-1; r >= 0 ; r--) {
+            for (let r = row - 1; r >= 0; r--) {
                 for (let c = 0; c < col; c++) {
-                    let line = figure[r].split('');
-                    (!rotateFigure[c]) ? rotateFigure[c] = line[c].toString() : rotateFigure[c] += line[c];
+                    if ((!rotateFigure[c])) {
+                        rotateFigure[c] = [];
+                    }
+                    rotateFigure[c].push(figure[r][c]);
                 }
             }
         }
@@ -301,73 +253,24 @@ let GAME = (function () {
      ----------- MOVE -----------
      */
     function rotate() {
-        let rotate = rotateFigure(Game.frame.figure.type);
-        let cells = drawPrototype(rotate, Game.frame.row, Game.frame.col);
-        if(canDrawElement(opt.bucketWrapperId, cells, Game.frame.figure.cells)) {
-            eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
-            drawElement(opt.bucketWrapperId, cells);
-            Game.frame.figure.type = rotate;
-            Game.frame.figure.cells = cells;
-        } else {
-            Game.frame.col++;
-        }
+
     }
 
     function left() {
-        Game.frame.col--;
-        let cells = drawPrototype(Game.frame.figure.type, Game.frame.row, Game.frame.col);
-        if(canDrawElement(opt.bucketWrapperId, cells, Game.frame.figure.cells)) {
-            eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
-            drawElement(opt.bucketWrapperId, cells);
-            Game.frame.figure.cells = cells;
-        } else {
-            Game.frame.col++;
-        }
+
     }
 
     function right() {
-        Game.frame.col++;
-        let cells = drawPrototype(Game.frame.figure.type, Game.frame.row, Game.frame.col);
-        if(canDrawElement(opt.bucketWrapperId, cells, Game.frame.figure.cells)) {
-            eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
-            drawElement(opt.bucketWrapperId, cells);
-            Game.frame.figure.cells = cells;
-        } else {
-            Game.frame.col--;
-        }
+
     }
 
     function down() {
-        Game.frame.row++;
-        let cells = drawPrototype(Game.frame.figure.type, Game.frame.row, Game.frame.col);
-        if(canDrawElement(opt.bucketWrapperId, cells, Game.frame.figure.cells)) {
-            eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
-            drawElement(opt.bucketWrapperId, cells);
-            Game.frame.figure.cells = cells;
-        } else {
-            Game.frame.row--;
-        }
+
     }
 
     /*
      ----------- / MOVE -----------
      */
-
-    /*
-     ------------------draw helpers---------------
-     */
-
-    function keySort(a, b) {
-        return unquote(a) > unquote(b);
-    }
-
-    function quote(val) {
-        return '"' + val + '"';
-    }
-
-    function unquote(val) {
-        return parseInt(val.replace(/\"/gi, ''))
-    }
 
     /**
      * "Центральная" линия/колонка
@@ -414,38 +317,32 @@ let GAME = (function () {
 
         // set trigger
         Game.next = true;
-        Game.frame.figure.type = figuresList[0];//Game.figures[getRandomInt(0,1)];// getRandomFigure();
-        //Game.frame.figure.type = getRandomFigure();
+        Game.frame.figure.type = figuresList[1];//Game.figures[getRandomInt(0,1)];// getRandomFigure();
+        //Game.frame.figure.type = rotateFigure(Game.frame.figure.type);
 
+        //Game.frame.row++;
+        //Game.frame.col++;
+
+        // offsets(пустые строки сверху и столбцы слева, так как рисуем слева-направо и сверху-вниз) для новой фигуры
+        console.log(Game.frame.row, Game.frame.col);
         console.log(Game.frame.figure.type);
-        console.log(rotateFigure(Game.frame.figure.type));
-        console.log(rotateFigure(rotateFigure(Game.frame.figure.type)));
-        console.log(rotateFigure(rotateFigure(rotateFigure(Game.frame.figure.type))));
-        console.log(rotateFigure(rotateFigure(rotateFigure(rotateFigure(Game.frame.figure.type)))));
+        console.log(drawInitOffset(Game.frame.figure.type));
+
+        //console.log(canDrawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col))
 
         return;
 
+        console.log(Game.frame.figure.type);
+        console.log(cells);
+        console.log(Game.frame.drawRowOffset);
+        console.log(Game.frame.drawColOffset);
+        console.log(canDrawElement(opt.bucketWrapperId, cells, Game.frame.figure.cells));
 
-
-
-        let cells = drawPrototype(Game.frame.figure.type, Game.frame.row, Game.frame.col);
-        console.log(cells)
-        if(canDrawElement(opt.bucketWrapperId, cells, Game.frame.figure.cells)) {
-            Game.frame.figure.cells = cells;
-            drawElement(opt.bucketWrapperId, cells);
+        if (canDrawElement(opt.bucketWrapperId, cells, Game.frame.figure.cells)) {
+            drawElement(opt.bucketWrapperId,cells);
         }
 
-
-
-        //Game.frame.figure.type = rotateFigure(Game.frame.figure.type);
-
-
-        cells = rotateFigure(cells);
-
-        if(canDrawElement(opt.bucketWrapperId, cells, Game.frame.figure.cells)) {
-            drawElement(opt.bucketWrapperId, cells);
-            Game.frame.figure.cells = cells;
-        }
+        return;
 
         //start();
     };
