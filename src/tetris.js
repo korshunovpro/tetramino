@@ -758,6 +758,7 @@ let GAME = (function () {
      */
     function dropDown(e) {
         e.preventDefault();
+        down();
         Game.frame.speed = 30;
     }
 
