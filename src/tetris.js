@@ -6,6 +6,8 @@ let GAME = (function () {
 
     let _self = this;
 
+    let buckets = {};
+
     /*
      * Установки
      */
@@ -37,7 +39,8 @@ let GAME = (function () {
         interval: {
             main: null,
             timer: null,
-            pause: false
+            pause: false,
+            drop: false
         },
         figures: [],
         count: {
@@ -99,12 +102,12 @@ let GAME = (function () {
     function drawBucket(bucketWrapperId, row, col) {
         if (bucketWrapperId) {
             Game.fill[bucketWrapperId] = [];
-            let bucket = document.createElement('table');
-            bucket.className = opt.bucketClassName;
+            buckets[bucketWrapperId] = document.createElement('table');
+            buckets[bucketWrapperId].className = opt.bucketClassName;
             for (let i = 1; i <= row; i++) {
-                lineAdd(bucketWrapperId, bucket, col, i);
+                lineAdd(bucketWrapperId, buckets[bucketWrapperId], col, i);
             }
-            document.getElementById(bucketWrapperId).appendChild(bucket);
+            document.getElementById(bucketWrapperId).appendChild(buckets[bucketWrapperId]);
             return true;
         }
         return false;
@@ -130,20 +133,21 @@ let GAME = (function () {
     /**
      * Удаляет линию
      * @param table
-     * @param el
+     * @param index
      */
-    function lineRemove(table, el) {
-        // table.removeChild(el);
+    function lineRemove(table, index) {
+        table.removeChild(table.childNodes[index]);
     }
 
     /**
      * Удаляет и добавляет линию
-     * @param table
-     * @param el
+     * @param bucketWrapperId
+     * @param index
      */
-    function lineDestroy(bucketWrapperId, table, el) {
-        // lineRemove(table, el);
-        // lineAdd(table, opt.col);
+    function lineDestroy(bucketWrapperId, index) {
+        lineRemove(buckets[bucketWrapperId], index-1);
+        Game.fill[bucketWrapperId].splice(index-1, 1);
+        lineAdd(bucketWrapperId, buckets[bucketWrapperId], opt.col);
     }
 
     /**
@@ -218,7 +222,6 @@ let GAME = (function () {
                     return false;
                 }
 
-
                 // collision
                 if (figure[r][c] === 1 && Game.fill[bucketWrapperId][(row + r) - Game.frame.offsetRow - 1][(col + c) - Game.frame.offsetCol] === 1
                     && (
@@ -242,20 +245,22 @@ let GAME = (function () {
      * @param figure
      * @param row
      * @param col
+     * @param offsetRow
+     * @param offsetCol
      * @returns {*}
      */
-    function drawElement(bucketWrapperId, figure, row, col) {
+    function drawElement(bucketWrapperId, figure, row, col, offsetRow, offsetCol) {
         let cells = {};
         for (let r = 0; r < figure.length; r++) {
             // blocks
             for (let c = 0; c < figure[r].length; c++) {
                 if (figure[r][c] === 1) {
-                    draw(bucketWrapperId, (row + r) - Game.frame.offsetRow, (col + c) - Game.frame.offsetCol);
+                    draw(bucketWrapperId, (row + r) - offsetRow, (col + c) - offsetCol);
 
-                    Game.fill[bucketWrapperId][(row + r) - Game.frame.offsetRow - 1][(col + c) - Game.frame.offsetCol] = 1;
+                    Game.fill[bucketWrapperId][(row + r) - offsetRow - 1][(col + c) - offsetCol] = 1;
 
-                    if (!cells[(row + r) - Game.frame.offsetRow]) cells[(row + r) - Game.frame.offsetRow] = {};
-                    cells[(row + r) - Game.frame.offsetRow][(col + c) - Game.frame.offsetCol] = 1
+                    if (!cells[(row + r) - offsetRow]) cells[(row + r) - offsetRow] = {};
+                    cells[(row + r) - offsetRow][(col + c) - offsetCol] = 1
                 }
             }
         }
@@ -339,7 +344,7 @@ let GAME = (function () {
             if (canDrawElement(opt.bucketWrapperId, newRotate, Game.frame.row, Game.frame.col, Game.frame.figure.cells)) {
                 eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
                 Game.frame.figure.type = newRotate;
-                Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col);
+                Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol);
             }
         }
 
@@ -353,7 +358,7 @@ let GAME = (function () {
             Game.frame.col--;
             if (canDrawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.figure.cells)) {
                 eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
-                Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col);
+                Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol);
             } else {
                 Game.frame.col++;
             }
@@ -368,7 +373,7 @@ let GAME = (function () {
             Game.frame.col++;
             if (canDrawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.figure.cells)) {
                 eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
-                Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col);
+                Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol);
             } else {
                 Game.frame.col--;
             }
@@ -383,7 +388,7 @@ let GAME = (function () {
             Game.frame.row++;
             if (canDrawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.figure.cells)) {
                 eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
-                Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col);
+                Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol);
                 return true;
             } else {
                 Game.frame.row--;
@@ -472,8 +477,12 @@ let GAME = (function () {
      */
     function start() {
 
+
+        showScore();
+        showLine();
         showHighScore();
         showTime();
+
         Game.interval.timer = setInterval(function(){
             if (!Game.pause) {
                 showTime();
@@ -490,26 +499,44 @@ let GAME = (function () {
                 showLevel();
 
                 // установка текущей и следующей фигуры
-
-                // случайная фигура
-                Game.frame.figure.type = getRandomFigure();
-                Game.frame.figure.cells = {};
-                // случайный разворот
-                for (let i = 0, rotates = getRandomInt(1, 4); i < rotates; i++) {
-                    Game.frame.figure.type = rotateFigure(Game.frame.figure.type);
+                if (Game.frame.figureNext.type.length > 0) {
+                    Game.frame.figure.type = Game.frame.figureNext.type;
+                    Game.frame.figure.cells = {};
+                } else {
+                    // случайная фигура
+                    Game.frame.figure.type = getRandomFigure();
+                    Game.frame.figure.cells = {};
+                    // случайный разворот
+                    for (let i = 0, rotates = getRandomInt(1, 4); i < rotates; i++) {
+                        Game.frame.figure.type = rotateFigure(Game.frame.figure.type);
+                    }
                 }
 
+                // случайная следующая фигура
+                Game.frame.figureNext.type = getRandomFigure();
+                Game.frame.figureNext.cells = {};
+                // случайный разворот
+                for (let i = 0, rotates = getRandomInt(1, 4); i < rotates; i++) {
+                    Game.frame.figureNext.type = rotateFigure(Game.frame.figureNext.type);
+                }
+
+                // отрисовка новой фигуры сверху
+                clear(opt.bucketNextWrapperId);
+                drawElement(opt.bucketNextWrapperId, Game.frame.figureNext.type, getCenter(4, Game.frame.figureNext.type.length), getCenter(4, Game.frame.figureNext.type[0].length), 0, 0);
+                // / случайная следующая фигура
+
                 Game.frame.row = 1;
-                Game.frame.col = getCenter(opt.col, Game.frame.figure.type.length);
+                Game.frame.col = getCenter(opt.col, Game.frame.figure.type[0].length);
+
 
                 let offsets = drawInitOffset(Game.frame.figure.type);
                 Game.frame.offsetRow = offsets.offsetRow;
                 Game.frame.offsetCol = offsets.offsetCol;
 
-                // отрисовка новой фигуры сферху
+                // отрисовка новой фигуры сверху
                 if (canDrawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.figure.cells)) {
                     eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
-                    Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col);
+                    Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol);
                 }
 
                 nextFrame();
@@ -540,21 +567,29 @@ let GAME = (function () {
                     Game.count.score += opt.score.figure[Game.frame.figure.type.length];
                     showScore();
 
+                    // стирание заполненных линий
                     let count = 0;
                     for (let i = ((Game.frame.row - Game.frame.offsetRow) + Game.frame.figure.type.length) - 1; i >= Game.frame.row - Game.frame.offsetRow ; i--) {
-                        // if (typeof Game.fill[opt.bucketWrapperId][i] !== 'undefined' && !checkValueInObject(Game.fill[opt.bucketWrapperId][i], 0) ) {
-                        //     lineDestroy(opt.bucketWrapperId, i, count);
-                        //     console.log(i+count)
-                        //     count++;
-                        // }
+                        if (typeof Game.fill[opt.bucketWrapperId][i-1] !== 'undefined' && !checkValueInObject(Game.fill[opt.bucketWrapperId][i-1], 0) ) {
+                            lineDestroy(opt.bucketWrapperId, i);
+                            i++;
+                            count++;
+                        }
+                    }
+                    Game.count.line += count;
+                    Game.count.score += ((Game.count.level * opt.score.line) * count);
+                    showLine();
+                    showScore();
+
+                    // следующая фигура
+                    console.log(Game.frame.row)
+                    if (Game.frame.row <= 2) {
+                        gameOver();
+                    } else {
+                        Game.next = true;
                     }
 
-                    // Game.count.line += count;
-                    // Game.count.score += ((Game.count.level * opt.score.line) * count);
-                    // showLine();
-                    // showScore();
-
-                    Game.next = true;
+                    return false
                 }
             }, Math.round(Game.frame.speed));
         }
@@ -581,14 +616,15 @@ let GAME = (function () {
         Game.count.line = 0;
         Game.count.timer = 0;
         Game.count.score = 0;
+        Game.count.level = 1;
 
         // reset frame data
         Game.frame.row = 1;
         Game.frame.col = 1;
         Game.frame.figure.type = [];
-        Game.frame.figure.cells = [];
+        Game.frame.figure.cells = {};
         Game.frame.figureNext.type = [];
-        Game.frame.figureNext.cells = [];
+        Game.frame.figureNext.cells = {};
         Game.frame.speed = opt.speed;
         Game.frame.offsetRow = 0;
         Game.frame.offsetCol = 0;
@@ -597,10 +633,18 @@ let GAME = (function () {
         Game.gameOver = false;
     }
 
+    /**
+     * gameOver
+     */
     function gameOver() {
-        if ((localStorage.getItem(opt.highScoreVar) || 0) < Game.count.score) {
+        Game.gameOver = true;
+        let newHiScore = false;
+        if (( localStorage.getItem(opt.highScoreVar) || 0) < Game.count.score ) {
+            newHiScore = true;
             localStorage.setItem(opt.highScoreVar, Game.count.score);
         }
+        showGameOver(newHiScore);
+        gameReset();
     }
 
     /**
@@ -645,7 +689,17 @@ let GAME = (function () {
         let h = (Game.count.timer > 3599) ? Math.round(Game.count.timer / 3600) : 0;
         let m = (Game.count.timer > 59) ? (Math.round((Game.count.timer - h * 3600) / 60)) : 0;
         let s = Math.round(((Game.count.timer - h * 3600) - m * 60));
+        s = (s >= 0 ) ? s : 0;
         document.querySelector('#time .value').innerText = ('0' + h).slice(-2) + ':' + ('0' + m).slice(-2) + ':' + ('0' + s).slice(-2);
+    }
+
+    function showGameOver(newHiScore) {
+        if (newHiScore) {
+            document.querySelector('#gameOver .value').innerText = localStorage.getItem(opt.highScoreVar);
+            document.querySelector('#gameOver h5').style.display = 'block';
+        }
+        document.querySelector('#bucketWrapper table').style.opacity = 0.5;
+        document.querySelector('#gameOver').style.display = 'block';
     }
 
 
@@ -687,9 +741,7 @@ let GAME = (function () {
      */
     function dropDown(e) {
         e.preventDefault();
-        if (Game.frame.speed > 30) {
-            Game.frame.speed = 30;
-        }
+        Game.frame.speed = 30;
     }
 
     return _self;
