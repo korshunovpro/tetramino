@@ -475,6 +475,10 @@ let GAME = (function () {
         // set trigger
         Game.next = true;
 
+        document.querySelector('#gameOver h5').style.display = 'none';
+        document.querySelector('#bucketWrapper table').style.opacity = 1;
+        document.querySelector('#gameOver').style.display = 'none';
+
         start();
 
     };
