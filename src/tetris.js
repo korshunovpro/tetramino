@@ -1,5 +1,5 @@
 /**
- * @todo: привести типы в ячейках и проверке на заполнение в единый вид или bool или int
+ * @todo: Нужны варианты отрисовки и верчения, как в NES и Tangen
  */
 
 let GAME = (function () {
@@ -346,7 +346,6 @@ let GAME = (function () {
                 Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol);
             }
         }
-
     }
 
     /**
