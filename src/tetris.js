@@ -8,6 +8,8 @@ let GAME = (function () {
 
     let buckets = {};
 
+    let Audio;
+
     /*
      * Установки
      */
@@ -341,6 +343,7 @@ let GAME = (function () {
         if (!Game.next && !Game.pause) {
             let newRotate = rotateFigure(Game.frame.figure.type);
             if (canDrawElement(opt.bucketWrapperId, newRotate, Game.frame.row, Game.frame.col, Game.frame.figure.cells)) {
+                Audio.blockRotate.play();
                 eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
                 Game.frame.figure.type = newRotate;
                 Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol);
@@ -355,6 +358,7 @@ let GAME = (function () {
         if (!Game.next && !Game.pause) {
             Game.frame.col--;
             if (canDrawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.figure.cells)) {
+                Audio.blockRotate.play();
                 eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
                 Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol);
             } else {
@@ -370,6 +374,7 @@ let GAME = (function () {
         if (!Game.next && !Game.pause) {
             Game.frame.col++;
             if (canDrawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.figure.cells)) {
+                Audio.blockRotate.play();
                 eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
                 Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol);
             } else {
@@ -385,6 +390,10 @@ let GAME = (function () {
         if (!Game.next && !Game.pause) {
             Game.frame.row++;
             if (canDrawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.figure.cells)) {
+                if (Game.frame.speed <= 50) {
+                } else {
+                    //Audio.blockRotate.play();
+                }
                 eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
                 Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol);
                 return true;
@@ -537,6 +546,7 @@ let GAME = (function () {
                     Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol);
                 }
 
+                Audio.whoosh.play();
                 nextFrame();
             }
 
@@ -560,6 +570,12 @@ let GAME = (function () {
                 }
                 //
                 else {
+                    if (Game.frame.speed < 50) {
+                        Audio.forceHit.play();
+                    } else {
+                        Audio.slowHit.play();
+                    }
+
                     // очки
                     Game.count.score += opt.score.figure[Game.frame.figure.type.length];
                     showScore();
@@ -569,6 +585,7 @@ let GAME = (function () {
                     for (let i = ((Game.frame.row - Game.frame.offsetRow) + Game.frame.figure.type.length) - 1; i >= Game.frame.row - Game.frame.offsetRow ; i--) {
                         if (typeof Game.fill[opt.bucketWrapperId][i-1] !== 'undefined' && !checkValueInObject(Game.fill[opt.bucketWrapperId][i-1], 0) ) {
                             lineDestroy(opt.bucketWrapperId, i);
+                            Audio.lineRemove.play();
                             i++;
                             count++;
                         }
@@ -666,6 +683,8 @@ let GAME = (function () {
      */
     _self.init = function (settings) {
 
+        Audio = new GameAudio();
+
         document.onkeydown = controlDown;
         document.onkeyup = controlUp;
 
@@ -708,6 +727,7 @@ let GAME = (function () {
     }
 
     function showGameOver(newHiScore) {
+        Audio.gameover.play();
         if (newHiScore) {
             document.querySelector('#gameOver .value').innerText = localStorage.getItem(opt.highScoreVar);
             document.querySelector('#gameOver h5').style.display = 'block';
