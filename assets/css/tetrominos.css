@@ -15,15 +15,9 @@ body {
     overflow: hidden;
 }
 
+
 .clear {
     clear: both;
-}
-
-h1 {
-    font-weight:normal;
-    padding-top:50px;
-    margin-bottom:50px;
-    font-size:18px;
 }
 
 p {
@@ -115,7 +109,7 @@ table.bucketNext td {
     text-align: center;
 }
 
-.btn span{
+.btn span {
     color: #c6c6c6;
     font-size:9px;
     display: inline-block;
@@ -130,7 +124,7 @@ table.bucketNext td {
     cursor: pointer;
 }
 
-#controls {
+.controls {
     padding-top:10px;
     margin-bottom:40px;
 }
@@ -153,4 +147,57 @@ table.bucketNext td {
     text-align: center;
     display: table;
 
+}
+
+/*start*/
+.start #game {
+    display: none;
+}
+
+#startPage {
+    display: none;
+    text-align: center;
+}
+
+#startPage .btn {
+    font-size:20px;
+    width:200px;
+    height:40px;
+    display: block;
+    line-height:40px;
+    background: none;
+    margin:0 auto 25px auto;
+}
+
+#startPage .btn span {
+    display: block;
+    background: none;
+    font-size:20px;
+    text-transform: uppercase;
+}
+
+.btn span:hover {
+    color: #dad73d;
+}
+
+img.logo {
+    margin-bottom:60px;
+}
+
+.start #startPage {
+    display: block;
+}
+
+h1 {
+    font-size: 60px;
+    font-weight: bold;
+    text-align: center;
+    text-transform: uppercase;
+    clear: both;
+    margin-top:30px;
+    margin-bottom:20px;
+}
+
+.value {
+    font-weight:bold;
 }

@@ -3,6 +3,10 @@ game = 'tetrominos';
 
 AZSplashScreen.show(function(){
     GAMES[game].game.init({row: 20, col:10});
-    GAMES[game].game.newGame(params);
+
+    if (GAMES[game].game.music) {
+        GAMES[game].game.Sound.music.stop(music);
+    }
+    GAMES[game].game.music = GAMES[game].game.Sound.music.play();
 });
 

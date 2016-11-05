@@ -20,7 +20,7 @@ GAMES.tetrominos.game = (function () {
 
     _self.Sound = null;
 
-    let music;
+    _self.music = 0;
 
     let blockStyle = [
         'blue',
@@ -108,7 +108,7 @@ GAMES.tetrominos.game = (function () {
         [[0, 1, 1], [1, 1, 0], [0, 0, 0]], // S
         [[0, 0, 0], [1, 1, 0], [0, 1, 1]], // Z
 
-        [[1, 0, 0], [1, 1, 1], [0, 0, 0]], // L
+        [[0, 0, 1], [1, 1, 1], [0, 0, 0]], // L
         [[0, 0, 0], [1, 1, 1], [0, 0, 1]], // J
 
         [[0, 0, 0], [1, 1, 1], [0, 1, 0]], // T
@@ -497,13 +497,11 @@ GAMES.tetrominos.game = (function () {
     _self.newGame = function (mode) {
 
         gameReset();
-        Game.gameOver = false;  
+        Game.gameOver = false;
 
-        if (music) {
-            _self.Sound.music.stop(music);
+        if (!music) {
+            _self.Sound.music.play(music);
         }
-
-        music = _self.Sound.music.play();
 
         // очистка поля
         clear(opt.bucketWrapperId);
@@ -515,6 +513,7 @@ GAMES.tetrominos.game = (function () {
         // set trigger
         Game.next = true;
 
+        document.querySelector('body').classList.remove('start');
         document.querySelector('#gameOver h5').style.display = 'none';
         document.querySelector('#bucketWrapper table').style.opacity = 1;
         document.querySelector('#gameOver').style.display = 'none';
@@ -529,7 +528,6 @@ GAMES.tetrominos.game = (function () {
      */
     function start() {
 
-        
 
         showScore();
         showLine();
@@ -580,7 +578,7 @@ GAMES.tetrominos.game = (function () {
 
                 // отрисовка новой фигуры сверху
                 clear(opt.bucketNextWrapperId);
-                drawElement(opt.bucketNextWrapperId, Game.frame.figureNext.type, 1, getCenter(5, Game.frame.figureNext.type[0].length), 0, 0, Game.frame.figureNext.style);
+                drawElement(opt.bucketNextWrapperId, Game.frame.figureNext.type, getCenter(4, Game.frame.figureNext.type.length), getCenter(5, Game.frame.figureNext.type[0].length), 0, 0, Game.frame.figureNext.style);
                 // / случайная следующая фигура
 
                 Game.frame.row = 1;
@@ -725,14 +723,14 @@ GAMES.tetrominos.game = (function () {
         if (!Game.pause) {
             _self.Sound.music.play();
             clearInterval(Game.interval.pause);
-            document.querySelector('#pause').classList.remove('blink');
+            document.querySelector('.pause').classList.remove('blink');
             document.querySelector('#bucketWrapper').classList.remove('blink');
         } else {
             _self.Sound.music.pause();
-            document.querySelector('#pause').classList.add('blink');
+            document.querySelector('.pause').classList.add('blink');
             document.querySelector('#bucketWrapper').classList.add('blink');
             Game.interval.pause = setInterval(function(){
-                document.querySelector('#pause').classList.toggle('blink');
+                document.querySelector('.pause').classList.toggle('blink');
                 document.querySelector('#bucketWrapper').classList.toggle('blink');
             }, 300);
         }
@@ -829,7 +827,7 @@ GAMES.tetrominos.game = (function () {
             e.preventDefault();
             _self.pause();
         }
-        else if (e.keyCode === 78 ) {// space
+        else if (e.keyCode === 78 ) {// n
             _self.newGame();
         }
     }

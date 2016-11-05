@@ -9,7 +9,7 @@ html {
 }
 
 body {
-    font-family: 'Press Start 2P', cursive;
+    font-family: 'Comfortaa', cursive;
     color: #fff;
     font-size:15px;
     padding:0;
@@ -17,25 +17,22 @@ body {
     background: url(../img/block.png) left top repeat;
 }
 
+body.splash {
+    background: #be000d;
+}
+
 #gameWrapper {
     width:760px;
     height:600px;
     margin:0 auto;
     overflow: hidden;
+    position: relative;
     padding-left:40px;
-}
-
-h1 {
-    font-size:18px;
-    font-weight:normal;
-    margin-top:0;
-    padding-top:20px;
-    margin-bottom:40px;
 }
 
 .value {
     display: inline-block;
-    font-size:14px;
+    font-size:20px;
     padding-top:15px;
     margin-bottom:20px;
 }
@@ -183,13 +180,13 @@ table.bucket td:after {
     margin-top:0;
 }
 
-#time {
-    margin-right:10px;
-    margin-bottom:20px;
-}
-
 #time, #level, #score, #scoreHigh {
     display: inline-block;
+}
+
+#time, #score, #line {
+    margin-top:15px;
+    width:100px;
 }
 
 #bucketWrapperNext {
@@ -204,8 +201,11 @@ table.bucket td:after {
     opacity:0.6;
 }
 
-p#credit {
-    font-size:9px;
+#credit {
+    font-size:12px;
     text-align: left;
     margin-top:10px;
+    position: absolute;
+    bottom: 0;
+    left:40px;
 }

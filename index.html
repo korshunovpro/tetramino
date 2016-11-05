@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <title>Game:Tetrominos Classic</title>
     <link href="https://fonts.googleapis.com/css?family=Press+Start+2P&amp;subset=cyrillic" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Comfortaa:300,400,700&amp;subset=cyrillic" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/tetrominos.css">
-     <link rel="stylesheet" href="assets/css/style-tetrominos.css">
+    <link rel="stylesheet" href="assets/css/style-tetrominos.css">
 </head>
 <body class="splash" oncontextmenu="return false">
 
@@ -16,8 +17,16 @@
 
         <!--START PAGE-->
         <div id="startPage">
-
-
+            <h1>
+                <span class="red">t</span><span class="green">e</span><span class="yellow">t</span><span>r</span><span>a</span><span>m</span><span>i</span><span>n</span><span>o</span><span>s</span>
+            </h1>
+            <img src="assets/img/start-page.png" class="logo">
+            <div class="controls">
+                <div class="btn new" onclick="GAMES.tetrominos.game.newGame('classic')"><span>Новая игра</span></div>
+                <div class="btn audio" onclick="GAMES.tetrominos.game.Sound.soundOnOff()"><span>Звук Вкл/Выкл</span></div>
+                <div class="btn mode"><span>Режим: classic</span></div>
+                <div class="btn settings"><span>Настройки</span></div>
+            </div>
         </div>
 
         <!--GAME-->
@@ -31,26 +40,28 @@
             </div>
 
             <div id="legend">
-                <div id="controls">
-                    <div class="btn" id="new" onclick="GAMES.tetrominos.game.newGame('classic')"><span>New Game</span></div>
-                    <div class="btn" id="pause" onclick="GAMES.tetrominos.game.pause()"><span>Pause</span></div>
-                    <div class="btn" id="audio" onclick="GAMES.tetrominos.game.Sound.soundOnOff()"><span>Sound On/Off</span></div>
+                <div class="controls">
+                    <div class="btn new" onclick="GAMES.tetrominos.game.newGame('classic')"><span>Новая игра</span></div>
+                    <div class="btn pause" onclick="GAMES.tetrominos.game.pause()"><span>Пауза</span></div>
+                    <div class="btn audio" onclick="GAMES.tetrominos.game.Sound.soundOnOff()"><span>Звук Вкл/Выкл</span></div>
                 </div>
 
-                <div id="mode">Mode: <span class="value">classic</span></div>
-                <div id="time">Time<br><span class="value">--:--:--</span></div>
-                <div id="level">Level<br><span class="value">---</span></div><br>
-                <div id="score">Score:<br><span class="value">------</span></div>
-                <div id="scoreHigh">Hi-score<br><span class="value">------</span></div><br>
-                <div id="line">Lines<br><span class="value">----</span></div><br>
                 <div id="bucketWrapperNext">
-                    <p>Next figure</p>
+                    <p>Следующая фигура:</p>
                 </div>
+
+                <div id="mode">Режим: <span class="value">classic</span></div>
+                <div id="time">Время:<br><span class="value">--:--:--</span></div>
+                <div id="level">Уровень:<br><span class="value">---</span></div><br>
+                <div id="score">Очки:<br><span class="value">------</span></div>
+                <div id="scoreHigh">Рекорд:<br><span class="value">------</span></div><br>
+                <div id="line">Линий:<br><span class="value">----</span></div><br>
+
             </div>
 
         </div>
 
-        <p id="credit"><small>&copy; advizo_games 2016. music by Dubmood/Razor911</small></p>
+        <span id="credit"><small>&copy; advizo_games 2016. музыка: Dubmood/Razor911</small></span>
 
         <script src="lib/howler.min.js"></script>
         <script src="src/splash-page.js"></script>
