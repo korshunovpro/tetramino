@@ -1,4 +1,4 @@
-GAMES.tetrominos.audio = function() {
+GAMES.tetramino.audio = function() {
 
     let _self = this;
     let muted = false;

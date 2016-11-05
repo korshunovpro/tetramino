@@ -64,14 +64,21 @@ p {
     margin-bottom:15px;
 }
 
-.value {
-    display: inline-block;
-    font-size:18px;
-    padding-top:15px;
-    margin-bottom:20px;
-    font-family: 'Share Tech Mono', monospace;
+
+.blink {
+    opacity:0.6;
 }
 
+h2 {
+    font-size: 30px;
+    margin: 0 0 25px 0;
+}
+
+h1, h2 {
+    text-shadow: 0px 0px 4px rgba(218, 215, 61, 0.5);
+}
+
+/*structure*/
 #gameWrapper {
     width:760px;
     height:600px;
@@ -117,19 +124,26 @@ p {
     z-index:10;
 }
 
+#bucketWrapper {
+    margin-top:10px;
+    overflow: hidden;
+    border-color:#dad73d ;
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
+    transition: opacity 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, boder-color 0.2s ease;
+}
+
 #bucketWrapper .background {
     position: absolute;
     left:0;
     bottom: 0;
     width:100%;
     height:100%;
-    opacity: 0.5;
-    background: #050D1F url(../img/bg.png) left bottom no-repeat;
+    opacity: 0.8;
+    background: #050D1F url(../img/moscow.png) left bottom no-repeat;
 }
 
 table.bucket {
-    margin-top:10px;
-    border: 1px solid #fff;
+    border: 1px solid #dad73d;
     border-spacing: 4px;
 }
 
@@ -145,8 +159,10 @@ table.bucket {
     background: none;
 }
 
+/*/ structure*/
 
-/*block & tetraminos style*/
+
+/*block & tetramino style*/
 table.bucket td,
 table.bucketNext td {
     background: none;
@@ -169,7 +185,6 @@ table.bucketNext td {
     top:-0px;
     left:-0px;
 }
-
 .block.default {
     background: #000;
     border:1px solid #1d1d1b;
@@ -177,6 +192,9 @@ table.bucketNext td {
     left:-1px;
 }
 
+.yellow {
+    color: #dad73d;
+}
 .block.yellow {
     background: #dad73d;
     border-top: 6px inset #ffff28;
@@ -186,6 +204,10 @@ table.bucketNext td {
     box-shadow: 0px 0px 0px 2px #dccf0f;
 }
 
+
+.blue {
+    color: #16bcd8;
+}
 .block.blue {
     background: #16bcd8;
     border-top: 6px inset rgb(0, 221, 255);
@@ -196,6 +218,9 @@ table.bucketNext td {
 }
 
 
+.red {
+    color: #f90113;
+}
 .block.red {
     background: #f90113;
     border-top: 6px inset #f91212;
@@ -205,6 +230,10 @@ table.bucketNext td {
     box-shadow: 0px 0px 0px 2px #e00e36;
 }
 
+
+.orange {
+    color: rgb(255, 103, 0);
+}
 .block.orange {
     background: rgb(255, 103, 0);
     border-top: 6px inset #f16705;
@@ -214,7 +243,9 @@ table.bucketNext td {
     box-shadow: 0px 0px 0px 2px #e6681e;
 }
 
-
+.green {
+    color: #30c55b;
+}
 .block.green {
     background: #30c55b;
     border-top: 6px inset #1dff50;
@@ -224,6 +255,9 @@ table.bucketNext td {
     box-shadow: 0px 0px 0px 2px #23c13e;
 }
 
+.purple {
+    color: #ff1fe0;
+}
 .block.purple {
     background: #ff1fe0;
     border-top: 6px inset #ff1fe0;
@@ -232,8 +266,39 @@ table.bucketNext td {
     border-left: 6px inset #ce2abf;
     box-shadow: 0px 0px 0px 2px #d822ce;
 }
-/*/ block & tetraminos style*/
+/*/ block & tetramino style*/
 
+
+/*legend*/
+.value {
+    display: inline-block;
+    font-size:22px;
+    padding-top:15px;
+    margin-bottom:20px;
+    font-family: 'Share Tech Mono', monospace;
+    color: rgba(218, 215, 61, 1);
+    font-weight:bold;
+}
+
+
+#time, #level, #score, #scoreHigh {
+    display: inline-block;
+}
+
+#time, #score, #line {
+    margin-top:15px;
+    width:130px;
+}
+
+#bucketWrapperNext {
+    display: block;
+}
+
+#rightBar, #bucketWrapperNext, #time, #level {
+    text-transform: uppercase;
+}
+
+/*/ legend*/
 
 
 
@@ -258,6 +323,16 @@ table.bucketNext td {
 }
 /*/ game over*/
 
+
+#credit {
+    color: #000;
+    font-size:12px;
+    text-align: left;
+    margin-top:10px;
+    position: absolute;
+    bottom: 0;
+    left:10px;
+}
 
 
 /*controls*/
@@ -298,7 +373,11 @@ table.bucketNext td {
 
 
 
-/*splash screen*/
+
+
+/*
+-----------------------splash screen-----------------------
+*/
 #splash {
     display: none;
 }
@@ -318,7 +397,22 @@ table.bucketNext td {
 }
 /*/ splash screen*/
 
-/*start*/
+
+
+/*
+-----------------------start page-----------------------
+*/
+h1 {
+    height:75px;
+    font-size: 60px;
+    font-weight: bold;
+    text-align: center;
+    text-transform: uppercase;
+    clear: both;
+    margin-top:30px;
+    margin-bottom:20px;
+}
+
 .start #game {
     display: none;
 }
@@ -353,47 +447,4 @@ img.logo {
 
 .start #startPage {
     display: block;
-}
-
-h1 {
-    height:75px;
-    font-size: 60px;
-    font-weight: bold;
-    text-align: center;
-    text-transform: uppercase;
-    clear: both;
-    margin-top:30px;
-    margin-bottom:20px;
-}
-
-
-#time, #level, #score, #scoreHigh {
-    display: inline-block;
-}
-
-#time, #score, #line {
-    margin-top:15px;
-    width:100px;
-}
-
-#bucketWrapperNext {
-    display: block;
-}
-
-#rightBar, #bucketWrapperNext, #time, #level {
-    text-transform: uppercase;
-}
-
-.blink {
-    opacity:0.6;
-}
-
-#credit {
-    color: #000;
-    font-size:12px;
-    text-align: left;
-    margin-top:10px;
-    position: absolute;
-    bottom: 0;
-    left:10px;
 }

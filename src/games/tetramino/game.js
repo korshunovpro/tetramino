@@ -2,18 +2,15 @@
  * @todo: генерация положений фигур при инициализации(как раз будет решена задача с разными системами вращения)
  * @todo: Нужны варианты отрисовки и верчения, как в NES и Tangen
  * @todo: моргающее убирание линий
+ * @todo: анимация при ударении об дно (моргание или вспышка фигуры)
+ * @todo: рисование проекции куда упадет фигура
+ * @todo: wall kicks - решить, будут или нет
  * @todo: events для функций отрисовки
- * @todo: music on/off
  * @todo: игрок-компьютер в соседнем окне
  *
  */
-GAMES.tetrominos.game = (function () {
-
-    const ROTATE_NES = 'nes';
-    const ROTATE_GAMEBOY = 'gameboy';
-    const ROTATE_SEGA = 'sega';
-    const ROTATE_SRS = 'srs';
-
+GAMES.tetramino.game = (function ()
+{
     let _self = this;
 
     let buckets = {};
@@ -50,10 +47,9 @@ GAMES.tetrominos.game = (function () {
         },
         levelUp:1000,
         levelTime:2,
-        highScoreVar: 'tetrominosHighScore',
+        highScoreVar: 'tetraminoHighScore',
         //
-        speed: 500,
-        rotateSystem: ROTATE_SRS
+        speed: 500
     };
 
     /**
@@ -83,7 +79,7 @@ GAMES.tetrominos.game = (function () {
             figure: {
                 type: [],
                 cells: {},
-                style:'default'
+                style:'default',
             },
             figureNext: {
                 type: [],
@@ -114,8 +110,24 @@ GAMES.tetrominos.game = (function () {
         [[0, 0, 0], [1, 1, 1], [0, 1, 0]], // T
     ];
 
+    /**
+     * Настройки для генерации положений фигур
+     * http://strategywiki.org/wiki/Tetris/Rotation_systems
+     */
+    let rotateSystem = {
+        classic: {I: [], O: [], S: [], Z: [], L: {}, J: {}, T: []}, // ors      http://strategywiki.org/wiki/File:Tetris_rotation_Nintendo.png
+        nes: {I: [], O: [], S: [], Z: [], L: {}, J: {}, T: []},     // nes      http://strategywiki.org/wiki/File:Tetris_rotation_Nintendo.png
+        gameboy: {I: [], O: [], S: [], Z: [], L: {}, J: {}, T: []}, // gameboy  http://strategywiki.org/wiki/File:Tetris_rotation_Gameboy.png
+        sega: {I: [], O: [], S: [], Z: [], L: {}, J: {}, T: []}, // sega     http://strategywiki.org/wiki/File:Tetris_rotation_Sega.png
+        srs: {I: [], O: [], S: [], Z: [], L: {}, J: {}, T: []}, // srs      http://strategywiki.org/wiki/File:Tetris_rotation_super.png
+    };
+
     let figures = [
         [
+            {
+                type:'',
+                rotates: []
+            }
 
         ]
     ];
@@ -184,6 +196,7 @@ GAMES.tetrominos.game = (function () {
 
     /**
      * Пустые строки сверху и столбцы слева при первой отрисовке фигуры
+     * что бы фигура рисовалась прижатой к потолку
      * @param figure
      */
     function drawInitOffset(figure) {
@@ -216,7 +229,6 @@ GAMES.tetrominos.game = (function () {
         if (Game.frame.offsetCol < 1) {
             offset.offsetCol = offsetCol;
         }
-
         return offset;
     }
 
@@ -237,7 +249,7 @@ GAMES.tetrominos.game = (function () {
         for (let r = 0; r < figure.length; r++) {
 
             // row top/bottom
-            if ( //(figure[r].indexOf(1) > -1 && (row + r) - Game.frame.offsetRow <= 0) ||
+            if ( /*//(figure[r].indexOf(1) > -1 && (row + r) - Game.frame.offsetRow <= 0) || // проваливается за потолок при повороте */
                  (figure[r].indexOf(1) > -1 && (row + r) - Game.frame.offsetRow > opt.row)
             ) {
                 return false;
@@ -347,7 +359,7 @@ GAMES.tetrominos.game = (function () {
      * @returns {*}
      */
     function rotateFigure(figure) {
-        /*SRS - rotation system, http://strategywiki.org/wiki/File:Tetrominos_rotation_super.png*/
+        /*SRS - rotation system, http://strategywiki.org/wiki/File:Tetramino_rotation_super.png*/
         let col = figure[0].length;
         let row = figure.length;
         let rotateFigure = [];
@@ -745,7 +757,7 @@ GAMES.tetrominos.game = (function () {
      */
     _self.init = function (settings) {
 
-        _self.Sound = new GAMES.tetrominos.audio();
+        _self.Sound = new GAMES.tetramino.audio();
 
         music = null;     
 

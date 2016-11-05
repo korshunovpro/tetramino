@@ -2,7 +2,7 @@ let GAMES = {
 
 };
 
-GAMES.tetrominos = {};
+GAMES.tetramino = {};
 
 let game = null;
 let params = {};

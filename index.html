@@ -2,11 +2,11 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Game:Tetrominos Classic</title>
+    <title>Game:Tetramino Classic</title>
     <link href="https://fonts.googleapis.com/css?family=Press+Start+2P&amp;subset=cyrillic" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Share+Tech+Mono" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Comfortaa:300,400,700&amp;subset=cyrillic" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/tetrominos.css">
+    <link rel="stylesheet" href="assets/css/tetramino.css">
 </head>
 <body class="splash" oncontextmenu="return false">
 <!--<body>-->
@@ -20,12 +20,12 @@
         <!--START PAGE-->
         <div id="startPage">
             <h1>
-                <span class="red">t</span><span class="green">e</span><span class="yellow">t</span><span>r</span><span>a</span><span>m</span><span>i</span><span>n</span><span>o</span><span>s</span>
+                <span class="purple">t</span><span class="red">e</span><span class="green">t</span><span class="blue">r</span><span class="orange">a</span><span class="yellow">m</span><span class="purple">i</span><span class="red">n</span><span class="green">o</span>
             </h1>
             <img src="assets/img/start-page.png" class="logo">
             <div class="controls">
-                <div class="btn new" onclick="GAMES.tetrominos.game.newGame('classic')"><span>Новая игра</span></div>
-                <div class="btn audio" onclick="GAMES.tetrominos.game.Sound.soundOnOff()"><span>Звук Вкл/Выкл</span></div>
+                <div class="btn new" onclick="GAMES.tetramino.game.newGame('classic')"><span>Новая игра</span></div>
+                <div class="btn audio" onclick="GAMES.tetramino.game.Sound.soundOnOff()"><span>Звук Вкл/Выкл</span></div>
                 <div class="btn mode"><span>Режим: classic</span></div>
                 <div class="btn settings"><span>Настройки</span></div>
             </div>
@@ -36,10 +36,10 @@
 
             <div id="leftBar">
                 <div class="controls">
-                    <div class="btn new" onclick="GAMES.tetrominos.game.newGame('classic')"><span>Новая игра</span></div>
-                    <div class="btn pause" onclick="GAMES.tetrominos.game.pause()"><span>Пауза</span></div>
+                    <div class="btn new" onclick="GAMES.tetramino.game.newGame('classic')"><span>Новая игра</span></div>
+                    <div class="btn pause" onclick="GAMES.tetramino.game.pause()"><span>Пауза</span></div>
                     <div class="btn start" onclick=""><span>Главное меню</span></div>
-                    <div class="btn audio" onclick="GAMES.tetrominos.game.Sound.soundOnOff()"><span>Звук Вкл/Выкл</span></div>
+                    <div class="btn audio" onclick="GAMES.tetramino.game.Sound.soundOnOff()"><span>Звук Вкл/Выкл</span></div>
                 </div>
             </div>
 
@@ -53,7 +53,9 @@
             </div>
 
             <div id="rightBar">
-
+                <h2>
+                    <span class="purple">t</span><span class="red">e</span><span class="green">t</span><span class="blue">r</span><span class="orange">a</span><span class="yellow">m</span><span class="purple">i</span><span class="red">n</span><span class="green">o</span>
+                </h2>
 
                 <div id="bucketWrapperNext">
                     <p>Следующая фигура:</p>
@@ -77,8 +79,8 @@
     <script src="lib/howler.min.js"></script>
     <script src="src/splash-page.js"></script>
     <script src="src/main.js"></script>
-    <script src="src/games/tetrominos/audio.js"></script>
-    <script src="src/games/tetrominos/game.js"></script>
+    <script src="src/games/tetramino/audio.js"></script>
+    <script src="src/games/tetramino/game.js"></script>
     <script src="src/game.js"></script>
 </body>
 </html>
