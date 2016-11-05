@@ -6,13 +6,13 @@ html {
 body {
     font-size:14px;
     margin: 0 auto;
-    text-align: center;
     min-height:100%;
     height: auto;
     width:100%;
     min-width: 1000px;
     background: #fff;
     padding-top:100px;
+    overflow: hidden;
 }
 
 .clear {
@@ -38,7 +38,7 @@ p {
 #legend, #bucketWrapperNext {
     vertical-align: top;
     display: inline-block;
-    margin:70px 0;
+    margin:70px 0 0 0;
     width:250px;
     text-align: left;
     position: relative;
@@ -62,7 +62,7 @@ p {
 
 table.bucket {
     border: 1px solid #555;
-    margin-top:20px;
+    margin-top:10px;
 }
 table.bucket td,
 table.bucketNext td {
@@ -113,7 +113,6 @@ table.bucketNext td {
     display: inline-block;
     border:1px solid #1d1d1b;
     text-align: center;
-    padding:4px;
 }
 
 .btn span{
@@ -129,4 +128,29 @@ table.bucketNext td {
 
 .btn {
     cursor: pointer;
+}
+
+#controls {
+    padding-top:10px;
+    margin-bottom:40px;
+}
+
+/*splash*/
+#splash {
+    display: none;
+}
+.splash #splash {
+    color: #000000;
+    background-color: #be000d;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 100;
+    font-size: 36px;
+    font-family: "Press Start 2P", cursive;
+    text-align: center;
+    display: table;
+
 }

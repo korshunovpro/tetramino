@@ -2,53 +2,64 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Game:Tetris Classic</title>
+    <title>Game:Tetrominos Classic</title>
     <link href="https://fonts.googleapis.com/css?family=Press+Start+2P&amp;subset=cyrillic" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/tetris.css">
-    <!--<link rel="stylesheet" href="assets/css/style-pocket.css">-->
-     <link rel="stylesheet" href="assets/css/style-tetris.css">
+    <link rel="stylesheet" href="assets/css/tetrominos.css">
+     <link rel="stylesheet" href="assets/css/style-tetrominos.css">
 </head>
-<body>
-    <div id="tetris">
-        <div id="controls">
-            <div class="btn" id="new" onclick="GAME.newGame('classic')"><span>new</span></div>
-            <div class="btn" id="pause" onclick="GAME.pause()"><span>pause</span></div>
+<body class="splash" oncontextmenu="return false">
+
+    <div id="gameWrapper">
+
+        <!--SPLASH-->
+        <div id="splash"></div>
+
+        <!--START PAGE-->
+        <div id="startPage">
+
+
         </div>
-        <div id="bucketWrapper">
-            <div id="gameOver">Игра окончена!
-                <br>
-                <h5>Новый рекорд: <b class="value"></b>!!!</h5>
+
+        <!--GAME-->
+        <div id="game">
+
+            <div id="bucketWrapper">
+                <div id="gameOver">Игра окончена!
+                    <br>
+                    <h5>Новый рекорд: <b class="value"></b>!!!</h5>
+                </div>
             </div>
-        </div>
-        <div id="legend">
-            <h1>Tetris: classic</h1>
-            <div id="time">Time<br><span class="value">--:--:--</span></div>
-            <div id="level">Level<br><span class="value">---</span></div><br>
-            <div id="score">Score:<br><span class="value">------</span></div><br>
-            <div id="scoreHigh">Hi-score<br><span class="value">------</span></div><br>
-            <div id="line">Lines<br><span class="value">----</span></div><br>
-            <div id="bucketWrapperNext">
-                <p>Next figure</p>
+
+            <div id="legend">
+                <div id="controls">
+                    <div class="btn" id="new" onclick="GAMES.tetrominos.game.newGame('classic')"><span>New Game</span></div>
+                    <div class="btn" id="pause" onclick="GAMES.tetrominos.game.pause()"><span>Pause</span></div>
+                    <div class="btn" id="audio" onclick="GAMES.tetrominos.game.Sound.soundOnOff()"><span>Sound On/Off</span></div>
+                </div>
+
+                <div id="mode">Mode: <span class="value">classic</span></div>
+                <div id="time">Time<br><span class="value">--:--:--</span></div>
+                <div id="level">Level<br><span class="value">---</span></div><br>
+                <div id="score">Score:<br><span class="value">------</span></div>
+                <div id="scoreHigh">Hi-score<br><span class="value">------</span></div><br>
+                <div id="line">Lines<br><span class="value">----</span></div><br>
+                <div id="bucketWrapperNext">
+                    <p>Next figure</p>
+                </div>
             </div>
+
         </div>
+
+        <p id="credit"><small>&copy; advizo_games 2016. music by Dubmood/Razor911</small></p>
+
+        <script src="lib/howler.min.js"></script>
+        <script src="src/splash-page.js"></script>
+        <script src="src/main.js"></script>
+        <script src="src/games/tetrominos/audio.js"></script>
+        <script src="src/games/tetrominos/game.js"></script>
+        <script src="src/game.js"></script>
 
     </div>
-    <br>
-    <br>
-    <span class="key">&#8679;</span> - повернуть
-    <span class="key">&#8678;</span> - влево
-    <span class="key">	&#8680;</span> - враво
-    <span class="key">&#8681;</span> - ускорить
-    <span class="key">пробел</span> - сбросить фигуру вниз
 
-    <script src="lib/howler.min.js"></script>
-    <script src="src/audio.js"></script>
-    <script src="src/tetris.js"></script>
-    <script>
-        GAME.init({
-            row: 20, col:10
-        });
-        GAME.newGame('classic');
-    </script>
 </body>
 </html>

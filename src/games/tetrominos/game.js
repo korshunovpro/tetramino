@@ -1,14 +1,26 @@
 /**
+ * @todo: генерация положений фигур при инициализации(как раз будет решена задача с разными системами вращения)
  * @todo: Нужны варианты отрисовки и верчения, как в NES и Tangen
+ * @todo: моргающее убирание линий
+ * @todo: events для функций отрисовки
+ * @todo: music on/off
+ * @todo: игрок-компьютер в соседнем окне
+ *
  */
+GAMES.tetrominos.game = (function () {
 
-let GAME = (function () {
+    const ROTATE_NES = 'nes';
+    const ROTATE_GAMEBOY = 'gameboy';
+    const ROTATE_SEGA = 'sega';
+    const ROTATE_SRS = 'srs';
 
     let _self = this;
 
     let buckets = {};
 
-    let Audio;
+    _self.Sound = null;
+
+    let music;
 
     let blockStyle = [
         'blue',
@@ -37,10 +49,11 @@ let GAME = (function () {
             line: 40
         },
         levelUp:1000,
-        levelTime:5,
-        highScoreVar: 'tetrisHighScore',
+        levelTime:2,
+        highScoreVar: 'tetrominosHighScore',
         //
-        speed: 500
+        speed: 500,
+        rotateSystem: ROTATE_SRS
     };
 
     /**
@@ -88,9 +101,9 @@ let GAME = (function () {
      * @type {[*]}
      */
     let figuresList = [
-        [[1, 1], [1, 1]], // O
-
         [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]], // I
+
+        [[1, 1], [1, 1]], // O
 
         [[0, 1, 1], [1, 1, 0], [0, 0, 0]], // S
         [[0, 0, 0], [1, 1, 0], [0, 1, 1]], // Z
@@ -99,6 +112,12 @@ let GAME = (function () {
         [[0, 0, 0], [1, 1, 1], [0, 0, 1]], // J
 
         [[0, 0, 0], [1, 1, 1], [0, 1, 0]], // T
+    ];
+
+    let figures = [
+        [
+
+        ]
     ];
 
     /*
@@ -218,8 +237,8 @@ let GAME = (function () {
         for (let r = 0; r < figure.length; r++) {
 
             // row top/bottom
-            if ((figure[r].indexOf(1) > -1 && (row + r) - Game.frame.offsetRow <= 0)
-                || (figure[r].indexOf(1) > -1 && (row + r) - Game.frame.offsetRow > opt.row)
+            if ( //(figure[r].indexOf(1) > -1 && (row + r) - Game.frame.offsetRow <= 0) ||
+                 (figure[r].indexOf(1) > -1 && (row + r) - Game.frame.offsetRow > opt.row)
             ) {
                 return false;
             }
@@ -236,7 +255,7 @@ let GAME = (function () {
                 }
 
                 // collision
-                if (figure[r][c] === 1 && Game.fill[bucketWrapperId][(row + r) - Game.frame.offsetRow - 1][(col + c) - Game.frame.offsetCol] === 1
+                if (((row + r) - Game.frame.offsetRow - 1) >= 0 && figure[r][c] === 1 && Game.fill[bucketWrapperId][(row + r) - Game.frame.offsetRow - 1][(col + c) - Game.frame.offsetCol] === 1
                     && (
                         typeof currentFigureCells[(row + r) - Game.frame.offsetRow] === 'undefined'
                         || (typeof currentFigureCells[(row + r) - Game.frame.offsetRow] !== 'undefined'
@@ -268,7 +287,7 @@ let GAME = (function () {
         for (let r = 0; r < figure.length; r++) {
             // blocks
             for (let c = 0; c < figure[r].length; c++) {
-                if (figure[r][c] === 1) {
+                if (figure[r][c] === 1 && (row + r) - offsetRow > 0 ) {
                     draw(bucketWrapperId, (row + r) - offsetRow, (col + c) - offsetCol, style);
 
                     Game.fill[bucketWrapperId][(row + r) - offsetRow - 1][(col + c) - offsetCol] = 1;
@@ -328,7 +347,7 @@ let GAME = (function () {
      * @returns {*}
      */
     function rotateFigure(figure) {
-        /*SRS - rotation system, http://strategywiki.org/wiki/File:Tetris_rotation_super.png*/
+        /*SRS - rotation system, http://strategywiki.org/wiki/File:Tetrominos_rotation_super.png*/
         let col = figure[0].length;
         let row = figure.length;
         let rotateFigure = [];
@@ -356,8 +375,8 @@ let GAME = (function () {
     function rotate() {
         if (!Game.next && !Game.pause) {
             let newRotate = rotateFigure(Game.frame.figure.type);
-            if (canDrawElement(opt.bucketWrapperId, newRotate, Game.frame.row, Game.frame.col, Game.frame.figure.cells)) {
-                Audio.blockRotate.play();
+            if (canDrawElement(opt.bucketWrapperId, newRotate, Game.frame.row, Game.frame.col, Game.frame.figure.cells) && Game.frame.figure.type.length != 2) {
+                _self.Sound.blockRotate.play();
                 eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
                 Game.frame.figure.type = newRotate;
                 Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol, Game.frame.figure.style);
@@ -372,7 +391,7 @@ let GAME = (function () {
         if (!Game.next && !Game.pause) {
             Game.frame.col--;
             if (canDrawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.figure.cells)) {
-                Audio.blockRotate.play();
+                _self.Sound.whoosh.play();
                 eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
                 Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol, Game.frame.figure.style);
             } else {
@@ -388,7 +407,7 @@ let GAME = (function () {
         if (!Game.next && !Game.pause) {
             Game.frame.col++;
             if (canDrawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.figure.cells)) {
-                Audio.blockRotate.play();
+                _self.Sound.whoosh.play();
                 eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
                 Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol, Game.frame.figure.style);
             } else {
@@ -406,7 +425,7 @@ let GAME = (function () {
             if (canDrawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.figure.cells)) {
                 if (Game.frame.speed <= 50) {
                 } else {
-                    //Audio.blockRotate.play();
+                    //_self.Sound.blockRotate.play();
                 }
                 eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
                 Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol, Game.frame.figure.style);
@@ -429,7 +448,7 @@ let GAME = (function () {
      * @returns {number}
      */
     function getCenter(count, length) {
-        return (count / 2 - Math.round(length / 2)) + 1;
+        return Math.round((count / 2 - Math.round(length / 2)) + 1);
     }
 
     /**
@@ -478,7 +497,14 @@ let GAME = (function () {
     _self.newGame = function (mode) {
 
         gameReset();
-        Game.gameOver = false;
+        Game.gameOver = false;  
+
+        if (music) {
+            _self.Sound.music.stop(music);
+        }
+
+        music = _self.Sound.music.play();
+
         // очистка поля
         clear(opt.bucketWrapperId);
         clear(opt.bucketNextWrapperId);
@@ -502,6 +528,8 @@ let GAME = (function () {
      * Start Game, основной цикл, начало новой фигуры
      */
     function start() {
+
+        
 
         showScore();
         showLine();
@@ -531,6 +559,7 @@ let GAME = (function () {
                 } else {
                     // случайная фигура
                     Game.frame.figure.type = getRandomFigure();
+                    //Game.frame.figure.type = figuresList[1];
                     Game.frame.figure.cells = {};
                     Game.frame.figure.style = blockStyle[getRandomInt(0, blockStyle.length-1)];
                     // случайный разворот
@@ -541,6 +570,7 @@ let GAME = (function () {
 
                 // случайная следующая фигура
                 Game.frame.figureNext.type = getRandomFigure();
+                //Game.frame.figureNext.type = figuresList[1];
                 Game.frame.figureNext.cells = {};
                 Game.frame.figureNext.style = blockStyle[getRandomInt(0, blockStyle.length-1)];
                 // случайный разворот
@@ -550,7 +580,7 @@ let GAME = (function () {
 
                 // отрисовка новой фигуры сверху
                 clear(opt.bucketNextWrapperId);
-                drawElement(opt.bucketNextWrapperId, Game.frame.figureNext.type, getCenter(4, Game.frame.figureNext.type.length), getCenter(4, Game.frame.figureNext.type[0].length), 0, 0, Game.frame.figureNext.style);
+                drawElement(opt.bucketNextWrapperId, Game.frame.figureNext.type, 1, getCenter(5, Game.frame.figureNext.type[0].length), 0, 0, Game.frame.figureNext.style);
                 // / случайная следующая фигура
 
                 Game.frame.row = 1;
@@ -564,7 +594,6 @@ let GAME = (function () {
                 // отрисовка новой фигуры сверху
                 if (canDrawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.figure.cells)) {
                     eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
-                    Audio.whoosh.play();
                     Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol, Game.frame.figure.style);
                 }                
                 nextFrame();
@@ -584,16 +613,16 @@ let GAME = (function () {
                 if(Game.pause) {
                     nextFrame();
                 }
-                //
+
                 else if(Game.interval.main && down()) {
                     nextFrame();
                 }
-                //
+
                 else {
                     if (Game.frame.speed < 50) {
-                        Audio.forceHit.play();
+                        _self.Sound.forceHit.play();
                     } else {
-                        Audio.slowHit.play();
+                        _self.Sound.slowHit.play();
                     }
 
                         // очки
@@ -605,11 +634,15 @@ let GAME = (function () {
                     for (let i = ((Game.frame.row - Game.frame.offsetRow) + Game.frame.figure.type.length) - 1; i >= Game.frame.row - Game.frame.offsetRow ; i--) {
                         if (typeof Game.fill[opt.bucketWrapperId][i-1] !== 'undefined' && !checkValueInObject(Game.fill[opt.bucketWrapperId][i-1], 0) ) {
                             lineDestroy(opt.bucketWrapperId, i);
-                            Audio.lineRemove.play();
                             i++;
                             count++;
                         }
                     }
+
+                    if (count) {
+                        _self.Sound.lineRemove.play();
+                    }
+
                     Game.count.line += count;
                     Game.count.score += ((Game.count.level * opt.score.line) * count);
                     showLine();
@@ -685,14 +718,22 @@ let GAME = (function () {
     }
 
     _self.pause = function () {
+
+        if (Game.gameOver) return;
         Game.pause = !Game.pause;
+        _self.Sound.pause.play();
         if (!Game.pause) {
+            _self.Sound.music.play();
             clearInterval(Game.interval.pause);
             document.querySelector('#pause').classList.remove('blink');
+            document.querySelector('#bucketWrapper').classList.remove('blink');
         } else {
+            _self.Sound.music.pause();
             document.querySelector('#pause').classList.add('blink');
+            document.querySelector('#bucketWrapper').classList.add('blink');
             Game.interval.pause = setInterval(function(){
                 document.querySelector('#pause').classList.toggle('blink');
+                document.querySelector('#bucketWrapper').classList.toggle('blink');
             }, 300);
         }
     };
@@ -702,10 +743,13 @@ let GAME = (function () {
      */
     _self.init = function (settings) {
 
-        Audio = new GameAudio();
+        _self.Sound = new GAMES.tetrominos.audio();
+
+        music = null;     
 
         document.onkeydown = controlDown;
         document.onkeyup = controlUp;
+        document.onmousedown = disableclick;
 
         for (let op in settings) {
             if (opt.hasOwnProperty(op)) {
@@ -714,7 +758,7 @@ let GAME = (function () {
         }
 
         drawBucket(opt.bucketWrapperId, opt.row, opt.col);
-        drawBucket(opt.bucketNextWrapperId, 4, 4);
+        drawBucket(opt.bucketNextWrapperId, 4, 5);
     };
 
     /*
@@ -738,15 +782,15 @@ let GAME = (function () {
 
     function showTime() {
         Game.count.timer++;
-        let h = (Game.count.timer > 3599) ? Math.round(Game.count.timer / 3600) : 0;
-        let m = (Game.count.timer > 59) ? (Math.round((Game.count.timer - h * 3600) / 60)) : 0;
-        let s = Math.round(((Game.count.timer - h * 3600) - m * 60));
-        s = (s >= 0 ) ? s : 0;
+        let h = (Game.count.timer >= 3600) ? Math.floor(Game.count.timer / 3600) : 0;
+        let m = (Game.count.timer >= 60) ? (Math.floor((Game.count.timer - h * 3600) / 60)) : 0;
+        let s = Math.floor(Game.count.timer - (h * 3600 + m * 60));
         document.querySelector('#time .value').innerText = ('0' + h).slice(-2) + ':' + ('0' + m).slice(-2) + ':' + ('0' + s).slice(-2);
     }
 
     function showGameOver(newHiScore) {
-        Audio.gameover.play();
+        _self.Sound.music.stop();
+        _self.Sound.gameover.play();
         if (newHiScore) {
             document.querySelector('#gameOver .value').innerText = localStorage.getItem(opt.highScoreVar);
             document.querySelector('#gameOver h5').style.display = 'block';
@@ -785,6 +829,9 @@ let GAME = (function () {
             e.preventDefault();
             _self.pause();
         }
+        else if (e.keyCode === 78 ) {// space
+            _self.newGame();
+        }
     }
 
     // key UP
@@ -800,6 +847,13 @@ let GAME = (function () {
         e.preventDefault();
         down();
         Game.frame.speed = 30;
+    }
+
+
+    function disableclick(event) {
+        if(event.button==2) {
+            return false;
+        }
     }
 
     return _self;
