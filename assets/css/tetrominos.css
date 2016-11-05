@@ -13,6 +13,12 @@ body {
     background: #fff;
     padding-top:100px;
     overflow: hidden;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 
@@ -181,6 +187,8 @@ table.bucketNext td {
 }
 
 img.logo {
+    width:278px;
+    height:74px;
     margin-bottom:60px;
 }
 
