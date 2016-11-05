@@ -496,6 +496,10 @@ GAMES.tetrominos.game = (function () {
      */
     _self.newGame = function (mode) {
 
+        if (Game.pause) {
+            _self.pause();
+        }
+
         gameReset();
         Game.gameOver = false;
 

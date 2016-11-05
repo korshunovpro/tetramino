@@ -10,3 +10,5 @@ AZSplashScreen.show(function(){
     GAMES[game].game.music = GAMES[game].game.Sound.music.play();
 });
 
+
+
