@@ -461,3 +461,7 @@ img.logo {
 .start #startPage {
     display: block;
 }
+
+#bucketWrapper table.bucket td.ghost {
+    background: rgba(255,255,255,0.07);
+}

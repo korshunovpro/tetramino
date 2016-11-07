@@ -271,6 +271,36 @@ GAMES.tetramino.game = (function ()
         return true;
     }
 
+    function drawGhost(bucketWrapperId, figure, row, col, offsetRow, offsetCol, currentFigureCells) {
+        let down = false;
+        while (!down) {
+            if (!canDrawElement(bucketWrapperId, figure, row, col, currentFigureCells)) {
+                row--;
+                down = true;
+                for (let r = 0; r < figure.length; r++) {
+                    // blocks
+                    for (let c = 0; c < figure[r].length; c++) {
+                        if (figure[r][c] === 1 && (row + r) - offsetRow > 0 ) {
+                            drawGhostBlock(bucketWrapperId, (row + r) - offsetRow, (col + c) - offsetCol);
+                        }
+                    }
+                }
+            }
+            row++;
+        }
+    }
+
+    function drawGhostBlock(bucketWrapperId, y, x) {
+        document.querySelector('#' + bucketWrapperId + ' tr:nth-child(' + y + ')' + ' td:nth-child(' + x + ')').classList.add('ghost');
+    }
+
+    function eraseGhost(bucketWrapperId) {
+        let elems = document.querySelectorAll('#' + bucketWrapperId + ' td.ghost');
+        for (let i = 0; i < elems.length; i++) {
+            elems[i].classList.remove('ghost');
+        }
+    }
+
     /**
      * Рисует элемент в основном стакане
      * @param bucketWrapperId
@@ -380,6 +410,10 @@ GAMES.tetramino.game = (function ()
                 eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
                 Game.frame.figure.type = newRotate;
                 Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol, Game.frame.figure.style);
+
+                eraseGhost(opt.bucketWrapperId);
+                drawGhost(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol,  Game.frame.figure.cells);
+
             }
         }
     }
@@ -394,6 +428,10 @@ GAMES.tetramino.game = (function ()
                 _self.Sound.whoosh.play();
                 eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
                 Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol, Game.frame.figure.style);
+
+                eraseGhost(opt.bucketWrapperId);
+                drawGhost(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol,  Game.frame.figure.cells);
+
             } else {
                 Game.frame.col++;
             }
@@ -410,6 +448,11 @@ GAMES.tetramino.game = (function ()
                 _self.Sound.whoosh.play();
                 eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
                 Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol, Game.frame.figure.style);
+
+                eraseGhost(opt.bucketWrapperId);
+                drawGhost(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol,  Game.frame.figure.cells);
+
+
             } else {
                 Game.frame.col--;
             }
@@ -429,6 +472,10 @@ GAMES.tetramino.game = (function ()
                 }
                 eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
                 Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol, Game.frame.figure.style);
+
+                eraseGhost(opt.bucketWrapperId);
+                drawGhost(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol,  Game.frame.figure.cells);
+
                 return true;
             } else {
                 Game.frame.row--;
@@ -534,9 +581,9 @@ GAMES.tetramino.game = (function ()
 
     };
 
-
     Game.fps = 60;
     Game.dt = 0;
+    Game.dtCounter = 0;
     Game.now = 0;
     Game.last = timestamp();
     Game.timeRatio = 30;
@@ -548,17 +595,21 @@ GAMES.tetramino.game = (function ()
 
             let stepRatio = (Game.timeRatio * Game.step);
 
-            console.log(Game.timeRatio)
-
             Game.now = timestamp();
             Game.dt = Game.dt + Math.min(1, (Game.now - Game.last) / 1000);
 
             while(Game.dt > stepRatio) {
                 Game.dt = Game.dt - stepRatio;
-                nextFrame();
+                move();
             }
 
-            start(Game.dt/Game.timeRatio);
+            showScore();
+            showLine();
+            showHighScore();
+            showTime();
+
+            nextFigure(Game.dt/Game.timeRatio);
+
             Game.last = Game.now;
             requestAnimationFrame(frame, document.getElementById('gameWrapper'));
         }
@@ -569,17 +620,8 @@ GAMES.tetramino.game = (function ()
     /**
      * Start Game, основной цикл, начало новой фигуры
      */
-    function start() {
+    function nextFigure() {
 
-        showScore();
-        showLine();
-        showHighScore();
-
-        // setInterval(function(){
-        //     if (!Game.pause) {
-        //         showTime();
-        //     }
-        // }, 1000);
 
         if (Game.next && !Game.pause && !Game.gameOver) {
 
@@ -612,6 +654,8 @@ GAMES.tetramino.game = (function ()
             // отрисовка новой фигуры сверху
             clear(opt.bucketNextWrapperId);
             drawElement(opt.bucketNextWrapperId, Game.frame.figureNext.type, getCenter(4, Game.frame.figureNext.type.length), getCenter(5, Game.frame.figureNext.type[0].length), 0, 0, Game.frame.figureNext.style);
+
+
             // / случайная следующая фигура
 
             Game.frame.row = 0;
@@ -626,6 +670,10 @@ GAMES.tetramino.game = (function ()
             if (canDrawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.figure.cells)) {
                 eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
                 Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol, Game.frame.figure.style);
+
+                eraseGhost(opt.bucketWrapperId);
+                drawGhost(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol, Game.frame.figure.cells);
+
             }
 
             Game.next = false;
@@ -635,17 +683,17 @@ GAMES.tetramino.game = (function ()
     /**
      * Кадр
      */
-    function nextFrame() {
+    function move() {
 
         if (Game.frame.figure.type.length > 0 && !Game.next) {
             //
             if(Game.pause) {}
-            else if(down()) {}
+            else if(down()) {  }
             else {
 
                 Game.next = true;
 
-                if (Game.frame.speed < 50) {
+                if (Game.timeRatio < 1) {
                     _self.Sound.forceHit.play();
                 } else {
                     _self.Sound.slowHit.play();
@@ -784,6 +832,11 @@ GAMES.tetramino.game = (function ()
         drawBucket(opt.bucketWrapperId, opt.row, opt.col);
         drawBucket(opt.bucketNextWrapperId, 4, 5);
     };
+
+
+    function initGamePad() {
+
+    }
 
     /*
      ------------------SHOWS---------------

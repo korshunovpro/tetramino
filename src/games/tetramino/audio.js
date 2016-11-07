@@ -13,18 +13,19 @@ GAMES.tetramino.audio = function() {
         muted = !muted;
     };
 
-    this.blockRotate = new Howl({
+    this.blockRotate  = new Howl({
         urls: ['./sounds/rotate.wav'],
-        volume: 0.25,
+        volume: 0.1,
     });
 
     this.slowHit = new Howl({
         urls: ['./sounds/down.wav'],
-        volume: 0.5,
+        volume: 0.2,
     });
 
     this.forceHit = new Howl({
-        urls: ['./sounds/drop.wav'],
+        urls: ['./sounds/down.wav'],
+        volume: 0.2,
     });
 
     this.pause = new Howl({
@@ -33,13 +34,13 @@ GAMES.tetramino.audio = function() {
     });
 
     this.lineRemove = new Howl({
-        urls: ['./sounds/line.wav'],
-        volume: 0.6
+        urls: ['./sounds/line-drop.wav'],
+        volume: 0.2
     });
 
     this.whoosh = new Howl({
         urls: ['./sounds/move.wav'],
-        volume: 0.5,
+        volume: 0.1,
     });
 
     this.gameover = new Howl({
@@ -48,7 +49,7 @@ GAMES.tetramino.audio = function() {
 
     this.music = new Howl({
         urls: ['./sounds/music.ogg'],
-        volume: 0.25,
+        volume: 0.15,
         onend: function() {
             _self.music.play();
         }
