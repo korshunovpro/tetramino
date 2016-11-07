@@ -1,13 +1,16 @@
 /**
- * @todo: генерация положений фигур при инициализации(как раз будет решена задача с разными системами вращения)
- * @todo: Нужны варианты отрисовки и верчения, как в NES и Tangen
+ * @todo: ПОявление фигуры покубикам сверху, как будто вылазит
  * @todo: моргающее убирание линий
+ * @todo: wall kicks - решить, будут или нет
+ * @todo: переделать момент с отрисовкой кадров, плавностью анимации и срабатыванию звуков
+ *
+ * @todo: генерация положений фигур при инициализации(как раз будет решена задача с разными системами вращения)
  * @todo: анимация при ударении об дно (моргание или вспышка фигуры)
  * @todo: рисование проекции куда упадет фигура
- * @todo: wall kicks - решить, будут или нет
  * @todo: events для функций отрисовки
  * @todo: игрок-компьютер в соседнем окне
- *
+ * @todo: анимация номера уровня при смене уровня
+ * @todo: анимация нового Рекорда
  */
 GAMES.tetramino.game = (function ()
 {
@@ -18,16 +21,6 @@ GAMES.tetramino.game = (function ()
     _self.Sound = null;
 
     _self.music = 0;
-
-    let blockStyle = [
-        'blue',
-        'red',
-        'orange',
-        'green',
-        'purple',
-        'yellow'
-    ];
-
 
     /*
      * Установки
@@ -49,7 +42,7 @@ GAMES.tetramino.game = (function ()
         levelTime:2,
         highScoreVar: 'tetraminoHighScore',
         //
-        speed: 500
+        speed: 1000
     };
 
     /**
@@ -96,41 +89,36 @@ GAMES.tetramino.game = (function ()
      * Список фигур
      * @type {[*]}
      */
-    let figuresList = [
-        [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]], // I
-
-        [[1, 1], [1, 1]], // O
-
-        [[0, 1, 1], [1, 1, 0], [0, 0, 0]], // S
-        [[0, 0, 0], [1, 1, 0], [0, 1, 1]], // Z
-
-        [[0, 0, 1], [1, 1, 1], [0, 0, 0]], // L
-        [[0, 0, 0], [1, 1, 1], [0, 0, 1]], // J
-
-        [[0, 0, 0], [1, 1, 1], [0, 1, 0]], // T
-    ];
-
-    /**
-     * Настройки для генерации положений фигур
-     * http://strategywiki.org/wiki/Tetris/Rotation_systems
-     */
-    let rotateSystem = {
-        classic: {I: [], O: [], S: [], Z: [], L: {}, J: {}, T: []}, // ors      http://strategywiki.org/wiki/File:Tetris_rotation_Nintendo.png
-        nes: {I: [], O: [], S: [], Z: [], L: {}, J: {}, T: []},     // nes      http://strategywiki.org/wiki/File:Tetris_rotation_Nintendo.png
-        gameboy: {I: [], O: [], S: [], Z: [], L: {}, J: {}, T: []}, // gameboy  http://strategywiki.org/wiki/File:Tetris_rotation_Gameboy.png
-        sega: {I: [], O: [], S: [], Z: [], L: {}, J: {}, T: []}, // sega     http://strategywiki.org/wiki/File:Tetris_rotation_Sega.png
-        srs: {I: [], O: [], S: [], Z: [], L: {}, J: {}, T: []}, // srs      http://strategywiki.org/wiki/File:Tetris_rotation_super.png
+    let figuresList = {
+        I: {
+            type: [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]],
+            color: 'cyan'
+        },
+        O: {
+            type: [[1, 1], [1, 1]],
+            color: 'yellow'
+        },
+        S: {
+            type: [[0, 1, 1], [1, 1, 0], [0, 0, 0]],
+            color: 'green'
+        },
+        Z: {
+            type: [[1, 1, 0], [0, 1, 1], [0, 0, 0]],
+            color: 'red'
+        },
+        L: {
+            type: [[0, 0, 1], [1, 1, 1], [0, 0, 0]],
+            color: 'orange'
+        },
+        J: {
+            type: [[1, 0, 0], [1, 1, 1], [0, 0, 0]],
+            color: 'blue'
+        },
+        T: {
+            type: [[0, 1, 0], [1, 1, 1], [0, 0, 0]],
+            color: 'purple'
+        }
     };
-
-    let figures = [
-        [
-            {
-                type:'',
-                rotates: []
-            }
-
-        ]
-    ];
 
     /*
      ------------DRAWS function------------
@@ -478,7 +466,8 @@ GAMES.tetramino.game = (function ()
      * @returns {*}
      */
     function getRandomFigure() {
-        return Game.figures[getRandomInt(0, (Game.figures.length - 1))];
+        let keys = Object.keys(Game.figures);
+        return Game.figures[keys[getRandomInt(0, (keys.length - 1))]];
     }
 
     /**
@@ -496,6 +485,13 @@ GAMES.tetramino.game = (function ()
             }
         }
         return false;
+    }
+
+    /**
+     * @returns {number}
+     */
+    function timestamp() {
+        return window.performance && window.performance.now ? window.performance.now() : new Date().getTime();
     }
 
     /*
@@ -524,7 +520,7 @@ GAMES.tetramino.game = (function ()
         clear(opt.bucketNextWrapperId);
 
         // figures
-        Game.figures = Game.figures.concat(figuresList);
+        Game.figures = figuresList;
 
         // set trigger
         Game.next = true;
@@ -534,143 +530,157 @@ GAMES.tetramino.game = (function ()
         document.querySelector('#bucketWrapper table').style.opacity = 1;
         document.querySelector('#gameOver').style.display = 'none';
 
-        start();
+        run();
 
     };
 
+
+    Game.fps = 60;
+    Game.dt = 0;
+    Game.now = 0;
+    Game.last = timestamp();
+    Game.timeRatio = 30;
+    Game.step = 1/Game.fps;
+
+    let run = function() {
+
+        function frame() {
+
+            let stepRatio = (Game.timeRatio * Game.step);
+
+            console.log(Game.timeRatio)
+
+            Game.now = timestamp();
+            Game.dt = Game.dt + Math.min(1, (Game.now - Game.last) / 1000);
+
+            while(Game.dt > stepRatio) {
+                Game.dt = Game.dt - stepRatio;
+                nextFrame();
+            }
+
+            start(Game.dt/Game.timeRatio);
+            Game.last = Game.now;
+            requestAnimationFrame(frame, document.getElementById('gameWrapper'));
+        }
+
+        requestAnimationFrame(frame);
+    };
 
     /**
      * Start Game, основной цикл, начало новой фигуры
      */
     function start() {
 
-
         showScore();
         showLine();
         showHighScore();
-        showTime();
 
-        Game.interval.timer = setInterval(function(){
-            if (!Game.pause) {
-                showTime();
+        // setInterval(function(){
+        //     if (!Game.pause) {
+        //         showTime();
+        //     }
+        // }, 1000);
+
+        if (Game.next && !Game.pause && !Game.gameOver) {
+
+            let figure;
+
+            // установка уровня
+            Game.count.level = 1 + Math.floor(Game.count.score/opt.levelUp);
+            Game.timeRatio = 30 - Game.count.level/10; // @todo: от уровня
+
+            showLevel();
+
+            // установка текущей и следующей фигуры
+            if (Game.frame.figureNext.type.length > 0) {
+                Game.frame.figure.type = Game.frame.figureNext.type;
+                Game.frame.figure.cells = {};
+                Game.frame.figure.style = Game.frame.figureNext.style;
+            } else {
+                // случайная фигура
+                figure = getRandomFigure();
+                Game.frame.figure.type = figure.type;
+                Game.frame.figure.cells = {};
+                Game.frame.figure.style = figure.color;
             }
-        }, 1000);
+            // случайная следующая фигура
+            figure = getRandomFigure();
+            Game.frame.figureNext.type = figure.type;
+            Game.frame.figureNext.cells = {};
+            Game.frame.figureNext.style = figure.color;
 
-        Game.interval.main = setInterval(function() {
+            // отрисовка новой фигуры сверху
+            clear(opt.bucketNextWrapperId);
+            drawElement(opt.bucketNextWrapperId, Game.frame.figureNext.type, getCenter(4, Game.frame.figureNext.type.length), getCenter(5, Game.frame.figureNext.type[0].length), 0, 0, Game.frame.figureNext.style);
+            // / случайная следующая фигура
 
-            if (Game.next && !Game.pause && !Game.gameOver) {
-
-                // установка уровня
-                Game.count.level = 1 + Math.floor(Game.count.score/opt.levelUp);
-                Game.frame.speed = opt.speed - (Game.count.level * opt.levelTime) + opt.levelTime;
-                showLevel();
-
-                // установка текущей и следующей фигуры
-                if (Game.frame.figureNext.type.length > 0) {
-                    Game.frame.figure.type = Game.frame.figureNext.type;
-                    Game.frame.figure.cells = {};
-                    Game.frame.figure.style = Game.frame.figureNext.style;
-                } else {
-                    // случайная фигура
-                    Game.frame.figure.type = getRandomFigure();
-                    //Game.frame.figure.type = figuresList[1];
-                    Game.frame.figure.cells = {};
-                    Game.frame.figure.style = blockStyle[getRandomInt(0, blockStyle.length-1)];
-                    // случайный разворот
-                    for (let i = 0, rotates = getRandomInt(1, 4); i < rotates; i++) {
-                        Game.frame.figure.type = rotateFigure(Game.frame.figure.type);
-                    }
-                }
-
-                // случайная следующая фигура
-                Game.frame.figureNext.type = getRandomFigure();
-                //Game.frame.figureNext.type = figuresList[1];
-                Game.frame.figureNext.cells = {};
-                Game.frame.figureNext.style = blockStyle[getRandomInt(0, blockStyle.length-1)];
-                // случайный разворот
-                for (let i = 0, rotates = getRandomInt(1, 4); i < rotates; i++) {
-                    Game.frame.figureNext.type = rotateFigure(Game.frame.figureNext.type);
-                }
-
-                // отрисовка новой фигуры сверху
-                clear(opt.bucketNextWrapperId);
-                drawElement(opt.bucketNextWrapperId, Game.frame.figureNext.type, getCenter(4, Game.frame.figureNext.type.length), getCenter(5, Game.frame.figureNext.type[0].length), 0, 0, Game.frame.figureNext.style);
-                // / случайная следующая фигура
-
-                Game.frame.row = 1;
-                Game.frame.col = getCenter(opt.col, Game.frame.figure.type[0].length);
+            Game.frame.row = 0;
+            Game.frame.col = getCenter(opt.col, Game.frame.figure.type[0].length);
 
 
-                let offsets = drawInitOffset(Game.frame.figure.type);
-                Game.frame.offsetRow = offsets.offsetRow;
-                Game.frame.offsetCol = offsets.offsetCol;
+            let offsets = drawInitOffset(Game.frame.figure.type);
+            Game.frame.offsetRow = offsets.offsetRow;
+            Game.frame.offsetCol = offsets.offsetCol;
 
-                // отрисовка новой фигуры сверху
-                if (canDrawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.figure.cells)) {
-                    eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
-                    Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol, Game.frame.figure.style);
-                }                
-                nextFrame();
+            // отрисовка новой фигуры сверху
+            if (canDrawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.figure.cells)) {
+                eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
+                Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol, Game.frame.figure.style);
             }
 
-        }, Math.round(opt.speed));
+            Game.next = false;
+        }
     }
 
     /**
      * Кадр
      */
     function nextFrame() {
-        if (Game.frame.figure.type.length > 0) {
-            Game.next = false;
-            setTimeout(function() {
-                //
-                if(Game.pause) {
-                    nextFrame();
+
+        if (Game.frame.figure.type.length > 0 && !Game.next) {
+            //
+            if(Game.pause) {}
+            else if(down()) {}
+            else {
+
+                Game.next = true;
+
+                if (Game.frame.speed < 50) {
+                    _self.Sound.forceHit.play();
+                } else {
+                    _self.Sound.slowHit.play();
                 }
 
-                else if(Game.interval.main && down()) {
-                    nextFrame();
+                // очки
+                Game.count.score += opt.score.figure[Game.frame.figure.type.length];
+                showScore();
+
+                // стирание заполненных линий
+                let count = 0;
+                for (let i = ((Game.frame.row - Game.frame.offsetRow) + Game.frame.figure.type.length) - 1; i >= Game.frame.row - Game.frame.offsetRow ; i--) {
+                    if (typeof Game.fill[opt.bucketWrapperId][i-1] !== 'undefined' && !checkValueInObject(Game.fill[opt.bucketWrapperId][i-1], 0) ) {
+                        lineDestroy(opt.bucketWrapperId, i);
+                        i++;
+                        count++;
+                    }
                 }
 
-                else {
-                    if (Game.frame.speed < 50) {
-                        _self.Sound.forceHit.play();
-                    } else {
-                        _self.Sound.slowHit.play();
-                    }
-
-                        // очки
-                        Game.count.score += opt.score.figure[Game.frame.figure.type.length];
-                        showScore();
-
-                    // стирание заполненных линий
-                    let count = 0;
-                    for (let i = ((Game.frame.row - Game.frame.offsetRow) + Game.frame.figure.type.length) - 1; i >= Game.frame.row - Game.frame.offsetRow ; i--) {
-                        if (typeof Game.fill[opt.bucketWrapperId][i-1] !== 'undefined' && !checkValueInObject(Game.fill[opt.bucketWrapperId][i-1], 0) ) {
-                            lineDestroy(opt.bucketWrapperId, i);
-                            i++;
-                            count++;
-                        }
-                    }
-
-                    if (count) {
-                        _self.Sound.lineRemove.play();
-                    }
-
-                    Game.count.line += count;
-                    Game.count.score += ((Game.count.level * opt.score.line) * count);
-                    showLine();
-                    showScore();
-
-                    // следующая фигура
-                    if (Game.frame.figure.type.length && Game.frame.row <= 2) {
-                        gameOver();
-                    } else {
-                        Game.next = true;
-                    }
-                    return false
+                if (count) {
+                    _self.Sound.lineRemove.play();
                 }
-            }, Math.round(Game.frame.speed));
+
+                Game.count.line += count;
+                Game.count.score += ((Game.count.level * opt.score.line) * count);
+                showLine();
+                showScore();
+
+                // следующая фигура
+                if (Game.frame.figure.type.length && Game.frame.row <= 2) {
+                    gameOver();
+                }
+
+                return false
+            }
         }
     }
 
@@ -859,8 +869,7 @@ GAMES.tetramino.game = (function ()
      */
     function dropDown(e) {
         e.preventDefault();
-        down();
-        Game.frame.speed = 30;
+        Game.timeRatio = 0.3;
     }
 
 
