@@ -466,10 +466,7 @@ GAMES.tetramino.game = (function ()
         if (!Game.next && !Game.pause) {
             Game.frame.row++;
             if (canDrawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.figure.cells)) {
-                if (Game.frame.speed <= 50) {
-                } else {
-                    //_self.Sound.blockRotate.play();
-                }
+
                 eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
                 Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol, Game.frame.figure.style);
 
@@ -598,7 +595,7 @@ GAMES.tetramino.game = (function ()
             Game.now = timestamp();
             Game.dt = Game.dt + Math.min(1, (Game.now - Game.last) / 1000);
 
-            while(Game.dt > stepRatio) {
+            while(Game.dt > stepRatio && !Game.gameOver) {
                 Game.dt = Game.dt - stepRatio;
                 move();
             }
@@ -608,7 +605,9 @@ GAMES.tetramino.game = (function ()
             showHighScore();
             showTime();
 
-            nextFigure(Game.dt/Game.timeRatio);
+            if (!Game.gameOver) {
+                nextFigure(Game.dt/Game.timeRatio);
+            }
 
             Game.last = Game.now;
             requestAnimationFrame(frame, document.getElementById('gameWrapper'));
@@ -621,7 +620,6 @@ GAMES.tetramino.game = (function ()
      * Start Game, основной цикл, начало новой фигуры
      */
     function nextFigure() {
-
 
         if (Game.next && !Game.pause && !Game.gameOver) {
 
@@ -651,7 +649,6 @@ GAMES.tetramino.game = (function ()
             Game.frame.figureNext.cells = {};
             Game.frame.figureNext.style = figure.color;
 
-            // отрисовка новой фигуры сверху
             clear(opt.bucketNextWrapperId);
             drawElement(opt.bucketNextWrapperId, Game.frame.figureNext.type, getCenter(4, Game.frame.figureNext.type.length), getCenter(5, Game.frame.figureNext.type[0].length), 0, 0, Game.frame.figureNext.style);
 
@@ -685,13 +682,18 @@ GAMES.tetramino.game = (function ()
      */
     function move() {
 
-        if (Game.frame.figure.type.length > 0 && !Game.next) {
+        if (Game.frame.figure.type.length > 0 && !Game.next && !Game.gameOver) {
             //
             if(Game.pause) {}
             else if(down()) {  }
             else {
 
                 Game.next = true;
+
+                // следующая фигура
+                if (Game.frame.figure.type.length && Game.frame.row < 2) {
+                    gameOver();
+                }
 
                 if (Game.timeRatio < 1) {
                     _self.Sound.forceHit.play();
@@ -721,11 +723,6 @@ GAMES.tetramino.game = (function ()
                 Game.count.score += ((Game.count.level * opt.score.line) * count);
                 showLine();
                 showScore();
-
-                // следующая фигура
-                if (Game.frame.figure.type.length && Game.frame.row <= 2) {
-                    gameOver();
-                }
 
                 return false
             }
@@ -906,8 +903,10 @@ GAMES.tetramino.game = (function ()
             e.preventDefault();
             _self.pause();
         }
-        else if (e.keyCode === 78 ) {// n
-            _self.newGame();
+        else if (e.keyCode === 90 ) {// n
+            function hold() {
+
+            }
         }
     }
 
