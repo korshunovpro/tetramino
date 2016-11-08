@@ -3,6 +3,7 @@ html {
 }
 
 body {
+    position: relative;
     min-height:100%;
     height: auto;
     width:100%;
@@ -292,7 +293,7 @@ table.bucketNext td {
 /*legend*/
 .value {
     display: inline-block;
-    font-size:22px;
+    font-size:28px;
     padding-top:15px;
     margin-bottom:20px;
     font-family: 'Share Tech Mono', monospace;
@@ -312,6 +313,7 @@ table.bucketNext td {
 
 #bucketWrapperNext {
     display: block;
+    margin-bottom:45px;
 }
 
 #rightBar, #bucketWrapperNext, #time, #level {
@@ -321,26 +323,8 @@ table.bucketNext td {
 /*/ legend*/
 
 
-
 /*game over*/
-#gameOver {
-    display: none;
-    position: absolute;
-    z-index:10;
-    top:40%;
-    background: rgba(0,0,0,0.8);
-    width:100%;
-    font-size:20px;
-    text-transform: uppercase;
-    padding:20px 0;
-    color: #fff;
-    text-align: center;
-}
 
-#gameOver h5 {
-    display: none;
-    font-weight:normal;
-}
 /*/ game over*/
 
 
@@ -476,3 +460,119 @@ img.logo {
 #bucketWrapper table.bucket td.ghost {
     background: rgba(255,255,255,0.07);
 }
+
+
+/*modal*/
+.modal.show {
+    display: block;
+    transition: width 1s ease-in, height 1s ease-in;
+}
+.modal {
+    display: none;
+    position: absolute;
+    z-index:201;
+    top:0;
+    left:0;
+    background: rgba(5, 13, 31, 0.9);
+    width:80%;
+    height:80%;
+    min-height:80%;
+    margin:5% 10% 15% 10%;
+    color: #fff;
+    text-align: center;
+    box-sizing: border-box;
+    padding-top:3%;
+    transition: width 1s ease-in, height 1s ease-in;
+}
+
+.modal .close {
+    cursor: pointer;
+    background: rgba(153, 153, 153, 0.5);
+    font-size:22px;
+    display: block;
+    width:24px;
+    line-height:24px;
+    text-align: center;
+    height:24px;
+    color: #fff;
+    position: absolute;
+    right:0;
+    top:0;
+    transition: background 0.3s ease;
+}
+
+.modal .close:hover {
+    background: rgba(153, 153, 153, 0.7);
+    transition: background 0.3s ease;
+}
+
+.modal .controls {
+    position: absolute;
+    width:200px;
+    left:50%;
+    margin-left:-100px;
+    bottom:0;
+}
+
+.modal .controls .btn {
+    font-size:20px;
+    height:40px;
+    display: block;
+    line-height:33px;
+    background: none;
+    margin:0 auto 25px auto;
+}
+
+.modal .controls .btn.small {
+    height:30px;
+    display: block;
+    width:60%;
+    line-height:23px;
+    background: none;
+    margin:0 auto 25px auto;
+}
+
+.modal .controls .small span {
+    font-size:9px !important;
+}
+
+.modal h3 {
+    font-size:40px;
+    margin-bottom:25px;
+}
+
+.modal h5 {
+    font-size:24px;
+    margin-bottom:25px;
+}
+
+.overlay {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.8s ease-in;
+}
+
+.modal-open .overlay {
+    position: absolute;
+    width:100%;
+    height:100%;
+    background: rgba(0,0,0,0.3);
+    z-index:200;
+    display: block;
+    opacity: 1;
+    transition: opacity 0.8s ease-in;
+}
+
+.modal p {
+    text-align: left;
+    padding:0 20%;
+}
+
+.modal p.center {
+    text-align: center;
+}
+
+#newRecord {
+    display: none;
+}
+

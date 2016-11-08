@@ -42,7 +42,8 @@ GAMES.tetramino.game = (function ()
         levelTime:2,
         highScoreVar: 'tetraminoHighScore',
         //
-        speed: 1000
+        speed: 1000,
+        frameTimeRatio: 50
     };
 
     /**
@@ -569,10 +570,10 @@ GAMES.tetramino.game = (function ()
         // set trigger
         Game.next = true;
 
-        document.querySelector('body').classList.remove('start');
-        document.querySelector('#gameOver h5').style.display = 'none';
+        document.querySelector('body').classList.remove('start', 'modal-open');
+        document.querySelector('#gameOver #newRecord').style.display = 'none';
         document.querySelector('#bucketWrapper table').style.opacity = 1;
-        document.querySelector('#gameOver').style.display = 'none';
+        document.querySelector('#gameOver').classList.remove('show');
 
         run();
 
@@ -580,10 +581,11 @@ GAMES.tetramino.game = (function ()
 
     Game.fps = 60;
     Game.dt = 0;
+    Game.dtTime = 0;
     Game.dtCounter = 0;
     Game.now = 0;
     Game.last = timestamp();
-    Game.timeRatio = 30;
+    Game.timeRatio = opt.frameTimeRatio;
     Game.step = 1/Game.fps;
 
     let run = function() {
@@ -600,10 +602,18 @@ GAMES.tetramino.game = (function ()
                 move();
             }
 
+            Game.dtTime = Game.dtTime + Math.min(1, (Game.now - Game.last) / 1000);
+            while(Game.dtTime > (60 * Game.step)  && !Game.gameOver) {
+                Game.dtTime = Game.dtTime - (60 * Game.step);
+                if (!Game.pause) {
+                    showTime();
+                }
+
+            }
+
             showScore();
             showLine();
             showHighScore();
-            showTime();
 
             if (!Game.gameOver) {
                 nextFigure(Game.dt/Game.timeRatio);
@@ -627,7 +637,7 @@ GAMES.tetramino.game = (function ()
 
             // установка уровня
             Game.count.level = 1 + Math.floor(Game.count.score/opt.levelUp);
-            Game.timeRatio = 30 - Game.count.level/10; // @todo: от уровня
+            Game.timeRatio = opt.frameTimeRatio - Game.count.level/10; // @todo: от уровня
 
             showLevel();
 
@@ -835,6 +845,30 @@ GAMES.tetramino.game = (function ()
 
         drawBucket(opt.bucketWrapperId, opt.row, opt.col);
         drawBucket(opt.bucketNextWrapperId, 4, 5);
+
+        let modalControls = document.querySelectorAll('.modal .controls .btn, .modal .close');
+        for(let bt of modalControls) {
+            bt.onclick = function() {
+                document.querySelector('body').classList.remove('modal-open');
+                if (!(bt.classList.contains('close')) ) {
+                    bt.parentNode.parentNode.classList.remove('show');
+                } else {
+                    bt.parentNode.classList.remove('show');
+                }
+
+                if (bt.classList.contains('newGame')) {
+                    _self.newGame('clasic');
+                }
+
+                if (bt.classList.contains('goToStart')) {
+                    let b = document.querySelector('body');
+                    gameReset();
+                    b.classList.add('start');
+                    _self.Sound.music.stop(music);
+                    _self.Sound.music.play();
+                }
+            };
+        }
     };
 
     /*
@@ -867,14 +901,27 @@ GAMES.tetramino.game = (function ()
     function showGameOver(newHiScore) {
         _self.Sound.music.stop();
         _self.Sound.gameover.play();
+        document.querySelector('#gameOver #gameScore .value').innerText = Game.count.score;
         if (newHiScore) {
-            document.querySelector('#gameOver .value').innerText = localStorage.getItem(opt.highScoreVar);
-            document.querySelector('#gameOver h5').style.display = 'block';
+            document.querySelector('#gameOver #newRecord .value').innerText = localStorage.getItem(opt.highScoreVar);
+            document.querySelector('#gameOver #newRecord').style.display = 'block';
         }
-        document.querySelector('#bucketWrapper table').style.opacity = 0.5;
-        document.querySelector('#gameOver').style.display = 'block';
+        document.querySelector('body').classList.add('modal-open');
+        document.querySelector('#gameOver').classList.add('show');
     }
 
+    _self.showModal = function(id) {
+        let mod = document.querySelector('#' + id);
+        if (mod) {
+            if (!Game.gameOver && Game.count.timer > 0) {
+                if (!Game.pause) {
+                    _self.pause();
+                }
+            }
+            mod.classList.add('show');
+            document.querySelector('body').classList.add('modal-open');
+        }
+    };
 
     /*
      ------------------CONTROL events---------------

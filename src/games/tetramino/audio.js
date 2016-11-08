@@ -12,7 +12,6 @@ GAMES.tetramino.audio = function() {
         }
         muted = !muted;
 
-
         let elems = document.querySelectorAll('.audio span');
         for (let el of elems) {
             if (muted) {

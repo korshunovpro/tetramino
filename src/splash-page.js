@@ -3,7 +3,7 @@ AZSplashScreen = (function () {
     let _self = this;
     let splash = document.getElementById('splash');
     let splashText = document.createElement('div');
-    let text = 'advizo_games';
+    let text = 'classic games';
 
     /**
      * Show splash
