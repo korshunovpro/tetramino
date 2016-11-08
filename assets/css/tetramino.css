@@ -338,6 +338,10 @@ table.bucketNext td {
     left:10px;
 }
 
+.version {
+    color: #fff;
+}
+
 
 /*controls*/
 .controls {

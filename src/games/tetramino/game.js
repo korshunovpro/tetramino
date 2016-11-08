@@ -792,7 +792,7 @@ GAMES.tetramino.game = (function ()
             newHiScore = true;
             localStorage.setItem(opt.highScoreVar, Game.count.score);
         }
-        showGameOver(newHiScore);
+        showGameOver(newHiScore,  Game.count.score);
         gameReset();
     }
 
@@ -901,7 +901,7 @@ GAMES.tetramino.game = (function ()
     function showGameOver(newHiScore) {
         _self.Sound.music.stop();
         _self.Sound.gameover.play();
-        document.querySelector('#gameOver #gameScore .value').innerText = Game.count.score;
+        document.querySelector('#gameOver #gameScore .value').innerText =  (Game.count.score || 0);
         if (newHiScore) {
             document.querySelector('#gameOver #newRecord .value').innerText = localStorage.getItem(opt.highScoreVar);
             document.querySelector('#gameOver #newRecord').style.display = 'block';
