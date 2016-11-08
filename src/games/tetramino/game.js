@@ -43,7 +43,9 @@ GAMES.tetramino.game = (function ()
         highScoreVar: 'tetraminoHighScore',
         //
         speed: 1000,
-        frameTimeRatio: 50
+        frameTimeRatio: 50,
+        // game setup
+        wallkicks: true
     };
 
     /**
@@ -233,7 +235,9 @@ GAMES.tetramino.game = (function ()
      *
      * @returns {boolean}
      */
-    function canDrawElement(bucketWrapperId, figure, row, col, currentFigureCells) {
+    function canDrawElement(bucketWrapperId, figure, row, col, currentFigureCells, rotate) {
+
+        rotate = (rotate || false);
 
         // rows
         for (let r = 0; r < figure.length; r++) {
@@ -253,6 +257,19 @@ GAMES.tetramino.game = (function ()
                         || (figure[r][c] === 1 && (col + c) - Game.frame.offsetCol <= 0)
                     )
                 ) {
+
+                    if (opt.wallkicks === true) {
+                        /*wall kick left*/
+                        if (rotate && (col + c) - Game.frame.offsetCol <=0 ) {
+                            Game.frame.col++;
+                            return canDrawElement(bucketWrapperId, figure, row, Game.frame.col, currentFigureCells, rotate)
+                        }
+                        /*wall kick right*/
+                        if (rotate && (col + c) - Game.frame.offsetCol > opt.col ) {
+                            Game.frame.col--;
+                            return canDrawElement(bucketWrapperId, figure, row, Game.frame.col, currentFigureCells, rotate)
+                        }
+                    }
                     return false;
                 }
 
@@ -407,7 +424,8 @@ GAMES.tetramino.game = (function ()
     function rotate() {
         if (!Game.next && !Game.pause) {
             let newRotate = rotateFigure(Game.frame.figure.type);
-            if (canDrawElement(opt.bucketWrapperId, newRotate, Game.frame.row, Game.frame.col, Game.frame.figure.cells) && Game.frame.figure.type.length != 2) {
+            if (res = canDrawElement(opt.bucketWrapperId, newRotate, Game.frame.row, Game.frame.col, Game.frame.figure.cells, true) && Game.frame.figure.type.length != 2) {
+
                 _self.Sound.blockRotate.play();
                 eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
                 Game.frame.figure.type = newRotate;
@@ -577,6 +595,7 @@ GAMES.tetramino.game = (function ()
         document.querySelector('#bucketWrapper table').style.opacity = 1;
         document.querySelector('#gameOver').classList.remove('show');
 
+        Game.countdown = -1;
         run();
 
     };
@@ -637,6 +656,7 @@ GAMES.tetramino.game = (function ()
             c.innerText = '';
             c.style.display = 'none;'
         } else if (Game.countdown > 0) {
+            console.log(Game.countdown)
             c.innerText = Game.countdown;
         }
         Game.countdown--;
@@ -797,7 +817,6 @@ GAMES.tetramino.game = (function ()
         Game.frame.offsetCol = 0;
 
         document.querySelector('#countdown').style.display = 'block';
-        Game.countdown = 3;
 
         Game.pause = false;
         Game.next = true;
@@ -879,6 +898,7 @@ GAMES.tetramino.game = (function ()
 
                 if (bt.classList.contains('newGame')) {
                     _self.newGame('clasic');
+                    return false;
                 }
 
                 if (bt.classList.contains('goToStart')) {
@@ -934,7 +954,7 @@ GAMES.tetramino.game = (function ()
     _self.showModal = function(id) {
         let mod = document.querySelector('#' + id);
         if (mod) {
-            if (!Game.gameOver && Game.count.timer > 0) {
+            if (!Game.gameOver) {
                 if (!Game.pause) {
                     _self.pause();
                 }
