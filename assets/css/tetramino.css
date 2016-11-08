@@ -34,7 +34,7 @@ body {
     left:0;
     top:0;
     z-index:1;
-    background: url(../img/block2.png) right top repeat;
+    background: url(../img/block.png) right top repeat;
 }
 
 .texture {
@@ -139,12 +139,18 @@ h1, h2 {
     width:100%;
     height:100%;
     opacity: 0.8;
-    background: #050D1F url(../img/moscow.png) left bottom no-repeat;
+    background: #050D1F;/* url(../img/moscow.png) left bottom no-repeat;*/
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#080d1e+0,0c101c+60,080d1e+100&1+0,0.67+100 */
+    background: -moz-linear-gradient(top,  rgba(8,13,30,1) 0%, rgba(12,16,28,0.8) 60%, rgba(8,13,30,0.67) 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top,  rgba(8,13,30,1) 0%,rgba(12,16,28,0.8) 60%,rgba(8,13,30,0.67) 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom,  rgba(8,13,30,1) 0%,rgba(12,16,28,0.8) 60%,rgba(8,13,30,0.67) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#080d1e', endColorstr='#ab080d1e',GradientType=0 ); /* IE6-9 */
+
 }
 
 table.bucket {
     border: 1px solid #dad73d;
-    border-spacing: 4px;
+    border-spacing: 2px;
 }
 
 #bucketWrapperNext table {
@@ -167,8 +173,8 @@ table.bucket td,
 table.bucketNext td {
     background: none;
     position: relative;
-    width:20px;
-    height:20px;
+    width:22px;
+    height:22px;
 }
 
 #bucketWrapper table.bucket td {
@@ -180,11 +186,12 @@ table.bucketNext td {
     position: absolute;
     background: #000;
     z-index:2;
-    width:calc(100% - 12px);
-    height:calc(100% - 12px);
-    top:-0px;
-    left:-0px;
+    width: calc(100% - 13px);
+    height: calc(100% - 13px);
+    top: 1px;
+    left: 1px;
 }
+
 .block.default {
     background: #000;
     border:1px solid #1d1d1b;
@@ -206,15 +213,15 @@ table.bucketNext td {
 
 
 .blue {
-    color: #1416d8;
+    color: #003bd8;
 }
 .block.blue {
-    background: #1b19d8;
-    border-top: 6px inset rgb(0, 57, 255);
+    background: rgb(49, 113, 255);
+    border-top: 6px inset rgb(0, 114, 255);
     border-right: 6px inset #3030ad;
     border-bottom: 6px solid #444994;
-    border-left: 6px inset rgb(18, 19, 224);
-    box-shadow: 0px 0px 0px 2px #1612d6;
+    border-left: 6px inset rgb(71, 72, 255);
+    box-shadow: 0px 0px 0px 2px #3171ff;
 }
 
 
@@ -374,7 +381,7 @@ table.bucketNext td {
     padding:4px 0;
 }
 
-.btn:hover {
+.btn:hover, .btn.blink {
     color: #dad73d;
     border-color:#dad73d ;
     opacity:1;
@@ -424,6 +431,10 @@ h1 {
     clear: both;
     margin-top:30px;
     margin-bottom:20px;
+}
+
+h1 small, h2 small {
+    font-size:30%;
 }
 
 .start #game {

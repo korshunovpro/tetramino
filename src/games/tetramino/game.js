@@ -425,7 +425,7 @@ GAMES.tetramino.game = (function ()
         if (!Game.next && !Game.pause) {
             Game.frame.col--;
             if (canDrawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.figure.cells)) {
-                _self.Sound.whoosh.play();
+                _self.Sound.moving.play();
                 eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
                 Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol, Game.frame.figure.style);
 
@@ -445,7 +445,7 @@ GAMES.tetramino.game = (function ()
         if (!Game.next && !Game.pause) {
             Game.frame.col++;
             if (canDrawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.figure.cells)) {
-                _self.Sound.whoosh.play();
+                _self.Sound.moving.play();
                 eraseElement(opt.bucketWrapperId, Game.frame.figure.cells);
                 Game.frame.figure.cells = drawElement(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol, Game.frame.figure.style);
 
@@ -814,7 +814,14 @@ GAMES.tetramino.game = (function ()
 
         _self.Sound = new GAMES.tetramino.audio();
 
-        music = null;     
+        let btn = document.querySelectorAll('.btn');
+        for (let bt of btn) {
+            bt.onmouseenter = function() { // курсор зашёл на элемент-родитель [mozilla.org]
+                _self.Sound.moving.play();
+            }
+        }
+
+        music = null;
 
         document.onkeydown = controlDown;
         document.onkeyup = controlUp;
@@ -829,11 +836,6 @@ GAMES.tetramino.game = (function ()
         drawBucket(opt.bucketWrapperId, opt.row, opt.col);
         drawBucket(opt.bucketNextWrapperId, 4, 5);
     };
-
-
-    function initGamePad() {
-
-    }
 
     /*
      ------------------SHOWS---------------

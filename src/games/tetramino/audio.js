@@ -11,6 +11,18 @@ GAMES.tetramino.audio = function() {
             Howler.unmute();
         }
         muted = !muted;
+
+
+        let elems = document.querySelectorAll('.audio span');
+        for (let el of elems) {
+            if (muted) {
+                el.innerText = "ВКЛ. ЗВУК";
+            } else {
+                el.innerText = "ВЫКЛ. ЗВУК";
+            }
+        }
+
+        return muted;
     };
 
     this.blockRotate  = new Howl({
@@ -38,7 +50,7 @@ GAMES.tetramino.audio = function() {
         volume: 0.2
     });
 
-    this.whoosh = new Howl({
+    this.moving = new Howl({
         urls: ['./sounds/move.wav'],
         volume: 0.1,
     });

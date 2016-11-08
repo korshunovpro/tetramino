@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Game:Tetramino Classic</title>
+    <title>ТЕТРИС: Classic</title>
     <link href="https://fonts.googleapis.com/css?family=Press+Start+2P&amp;subset=cyrillic" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Share+Tech+Mono" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Comfortaa:300,400,700&amp;subset=cyrillic" rel="stylesheet">
@@ -20,13 +20,12 @@
         <!--START PAGE-->
         <div id="startPage">
             <h1>
-                <span class="purple">t</span><span class="red">e</span><span class="green">t</span><span class="blue">r</span><span class="orange">a</span><span class="yellow">m</span><span class="purple">i</span><span class="red">n</span><span class="green">o</span>
+                <span class="purple">т</span><span class="red">е</span><span class="green">т</span><span class="blue">р</span><span class="orange">и</span><span class="yellow">с</span> <small>classic</small>
             </h1>
             <img src="assets/img/start-page.png" class="logo">
             <div class="controls">
                 <div class="btn new" onclick="GAMES.tetramino.game.newGame('classic')"><span>Новая игра</span></div>
-                <div class="btn audio" onclick="GAMES.tetramino.game.Sound.soundOnOff()"><span>Звук Вкл/Выкл</span></div>
-                <div class="btn mode"><span>Режим: classic</span></div>
+                <div class="btn audio" onclick="GAMES.tetramino.game.Sound.soundOnOff()"><span>Выкл. звук</span></div>
                 <div class="btn settings"><span>Настройки</span></div>
             </div>
         </div>
@@ -42,7 +41,7 @@
                     <div class="btn new" onclick="GAMES.tetramino.game.newGame('classic')"><span>Новая игра</span></div>
                     <div class="btn pause" onclick="GAMES.tetramino.game.pause()"><span>Пауза</span></div>
                     <div class="btn start" onclick=""><span>Главное меню</span></div>
-                    <div class="btn audio" onclick="GAMES.tetramino.game.Sound.soundOnOff()"><span>Звук Вкл/Выкл</span></div>
+                    <div class="btn audio" onclick="GAMES.tetramino.game.Sound.soundOnOff()"><span>Выкл. звук</span></div>
                 </div>
             </div>
 
@@ -57,24 +56,19 @@
 
             <div id="rightBar">
                 <h2>
-                    <span class="purple">t</span><span class="red">e</span><span class="green">t</span><span class="blue">r</span><span class="orange">a</span><span class="yellow">m</span><span class="purple">i</span><span class="red">n</span><span class="green">o</span>
+                    <span class="purple">т</span><span class="red">е</span><span class="green">т</span><span class="blue">р</span><span class="orange">и</span><span class="yellow">с</span> <small>classic</small>
                 </h2>
 
                 <div id="bucketWrapperNext">
                     <p>Следующая фигура:</p>
                 </div>
-
-                <div id="mode">Режим: <span class="value">classic</span></div>
                 <div id="time">Время:<br><span class="value">--:--:--</span></div>
                 <div id="level">Уровень:<br><span class="value">---</span></div><br>
                 <div id="score">Очки:<br><span class="value">------</span></div>
                 <div id="scoreHigh">Рекорд:<br><span class="value">------</span></div><br>
                 <div id="line">Линий:<br><span class="value">----</span></div><br>
-
             </div>
-
         </div>
-
         <span id="credit"><small>&copy; advizo_games 2016. музыка: Dubmood/Razor911</small></span>
     </div>
 
