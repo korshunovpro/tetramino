@@ -83,7 +83,8 @@ GAMES.tetramino.game = (function ()
         },
         pause: false,
         next: true,
-        gameOver: false
+        gameOver: false,
+        countdown:3
     };
 
     /**
@@ -563,6 +564,7 @@ GAMES.tetramino.game = (function ()
         // очистка поля
         clear(opt.bucketWrapperId);
         clear(opt.bucketNextWrapperId);
+        eraseGhost(opt.bucketWrapperId);
 
         // figures
         Game.figures = figuresList;
@@ -605,17 +607,19 @@ GAMES.tetramino.game = (function ()
             Game.dtTime = Game.dtTime + Math.min(1, (Game.now - Game.last) / 1000);
             while(Game.dtTime > (60 * Game.step)  && !Game.gameOver) {
                 Game.dtTime = Game.dtTime - (60 * Game.step);
-                if (!Game.pause) {
-                    showTime();
-                }
 
+                if (!Game.pause && Game.countdown < 0) {
+                    showTime();
+                } else if (!Game.pause && Game.countdown >= 0) {
+                    showCountdown();
+                }
             }
 
             showScore();
             showLine();
             showHighScore();
 
-            if (!Game.gameOver) {
+            if (!Game.gameOver && Game.countdown < 0) {
                 nextFigure(Game.dt/Game.timeRatio);
             }
 
@@ -625,6 +629,18 @@ GAMES.tetramino.game = (function ()
 
         requestAnimationFrame(frame);
     };
+
+
+    function showCountdown() {
+        let c = document.querySelector('#countdown');
+        if (Game.countdown <= 0) {
+            c.innerText = '';
+            c.style.display = 'none;'
+        } else if (Game.countdown > 0) {
+            c.innerText = Game.countdown;
+        }
+        Game.countdown--;
+    }
 
     /**
      * Start Game, основной цикл, начало новой фигуры
@@ -681,6 +697,8 @@ GAMES.tetramino.game = (function ()
                 eraseGhost(opt.bucketWrapperId);
                 drawGhost(opt.bucketWrapperId, Game.frame.figure.type, Game.frame.row, Game.frame.col, Game.frame.offsetRow, Game.frame.offsetCol, Game.frame.figure.cells);
 
+            } else {
+                gameOver();
             }
 
             Game.next = false;
@@ -701,9 +719,9 @@ GAMES.tetramino.game = (function ()
                 Game.next = true;
 
                 // следующая фигура
-                if (Game.frame.figure.type.length && Game.frame.row < 2) {
-                    gameOver();
-                }
+                // if (Game.frame.figure.type.length && Game.frame.row < 1) {
+                //
+                // }
 
                 if (Game.timeRatio < 1) {
                     _self.Sound.forceHit.play();
@@ -777,6 +795,9 @@ GAMES.tetramino.game = (function ()
         Game.frame.speed = opt.speed;
         Game.frame.offsetRow = 0;
         Game.frame.offsetCol = 0;
+
+        document.querySelector('#countdown').style.display = 'block';
+        Game.countdown = 3;
 
         Game.pause = false;
         Game.next = true;
