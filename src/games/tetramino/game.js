@@ -1,12 +1,7 @@
 /**
- * @todo: ПОявление фигуры покубикам сверху, как будто вылазит
  * @todo: моргающее убирание линий
- * @todo: wall kicks - решить, будут или нет
- * @todo: переделать момент с отрисовкой кадров, плавностью анимации и срабатыванию звуков
- *
  * @todo: генерация положений фигур при инициализации(как раз будет решена задача с разными системами вращения)
  * @todo: анимация при ударении об дно (моргание или вспышка фигуры)
- * @todo: рисование проекции куда упадет фигура
  * @todo: events для функций отрисовки
  * @todo: игрок-компьютер в соседнем окне
  * @todo: анимация номера уровня при смене уровня
@@ -231,13 +226,15 @@ GAMES.tetramino.game = (function ()
      * @param figure
      * @param row
      * @param col
+     * @param rotate
      * @param currentFigureCells
      *
      * @returns {boolean}
      */
-    function canDrawElement(bucketWrapperId, figure, row, col, currentFigureCells, rotate) {
+    function canDrawElement(bucketWrapperId, figure, row, col, currentFigureCells, rotate, more) {
 
         rotate = (rotate || false);
+        more = (more || 0);
 
         // rows
         for (let r = 0; r < figure.length; r++) {
@@ -251,29 +248,34 @@ GAMES.tetramino.game = (function ()
 
             // cols
             for (let c = 0; c < figure[r].length; c++) {
-                // left/right
+
+                // left/right wall
                 if ((figure[r][c] === 1 && (col + c) - Game.frame.offsetCol <= 0)
                     || ((figure[r][c] === 1 && (col + c) - Game.frame.offsetCol > opt.col)
                         || (figure[r][c] === 1 && (col + c) - Game.frame.offsetCol <= 0)
                     )
                 ) {
 
-                    if (opt.wallkicks === true) {
+                    if (opt.wallkicks === true && more <= 2) {
                         /*wall kick left*/
                         if (rotate && (col + c) - Game.frame.offsetCol <=0 ) {
-                            Game.frame.col++;
-                            return canDrawElement(bucketWrapperId, figure, row, Game.frame.col, currentFigureCells, rotate)
+                            if (canDrawElement(bucketWrapperId, figure, row, (col+1), currentFigureCells, rotate, ++more)) {
+                                Game.frame.col++;
+                                return true;
+                            }
                         }
                         /*wall kick right*/
                         if (rotate && (col + c) - Game.frame.offsetCol > opt.col ) {
-                            Game.frame.col--;
-                            return canDrawElement(bucketWrapperId, figure, row, Game.frame.col, currentFigureCells, rotate)
+                            if (canDrawElement(bucketWrapperId, figure, row, (col-1), currentFigureCells, rotate, ++more)) {
+                                Game.frame.col--;
+                                return true;
+                            }
                         }
                     }
                     return false;
                 }
 
-                // collision
+                // left/right figure
                 if (((row + r) - Game.frame.offsetRow - 1) >= 0 && figure[r][c] === 1 && Game.fill[bucketWrapperId][(row + r) - Game.frame.offsetRow - 1][(col + c) - Game.frame.offsetCol] === 1
                     && (
                         typeof currentFigureCells[(row + r) - Game.frame.offsetRow] === 'undefined'
@@ -282,6 +284,24 @@ GAMES.tetramino.game = (function ()
                         )
                     )
                 ) {
+                    if (opt.wallkicks === true && more <= 2) {
+                        /*wall kick left*/
+                        if (rotate && (col + c) - Game.frame.offsetCol <= col) {
+                            if (canDrawElement(bucketWrapperId, figure, row, (col+1), currentFigureCells, rotate, ++more)) {
+                                Game.frame.col++;
+                                return true;
+                            }
+                        }
+
+                        /*wall kick right*/
+                        if (rotate && (col + c) - Game.frame.offsetCol > col) {
+                            if (canDrawElement(bucketWrapperId, figure, row, (col-1), currentFigureCells, rotate, ++more)) {
+                                Game.frame.col--;
+                                return true;
+                            }
+                        }
+                    }
+
                     return false;
                 }
             }
