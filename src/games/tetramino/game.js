@@ -68,11 +68,13 @@ GAMES.tetramino.game = (function ()
             offsetRow: 0,
             offsetCol: 0,
             figure: {
+                code: '',
                 type: [],
                 cells: {},
                 style:'default',
             },
             figureNext: {
+                code: '',
                 type: [],
                 cells: {},
                 style:'default'
@@ -256,7 +258,8 @@ GAMES.tetramino.game = (function ()
                     )
                 ) {
 
-                    if (opt.wallkicks === true && more <= 2) {
+                    if (opt.wallkicks === true && (more < 1 || (Game.frame.figure.code == 'I' && more <= 1 )) ) {
+
                         /*wall kick left*/
                         if (rotate && (col + c) - Game.frame.offsetCol <=0 ) {
                             if (canDrawElement(bucketWrapperId, figure, row, (col+1), currentFigureCells, rotate, ++more)) {
@@ -284,7 +287,8 @@ GAMES.tetramino.game = (function ()
                         )
                     )
                 ) {
-                    if (opt.wallkicks === true && more <= 2) {
+                    if (opt.wallkicks === true && (more < 1 || (Game.frame.figure.code == 'I' && more <= 1 )) ) {
+
                         /*wall kick left*/
                         if (rotate && (col + c) - Game.frame.offsetCol <= col) {
                             if (canDrawElement(bucketWrapperId, figure, row, (col+1), currentFigureCells, rotate, ++more)) {
@@ -416,7 +420,6 @@ GAMES.tetramino.game = (function ()
      * @returns {*}
      */
     function rotateFigure(figure) {
-        /*SRS - rotation system, http://strategywiki.org/wiki/File:Tetramino_rotation_super.png*/
         let col = figure[0].length;
         let row = figure.length;
         let rotateFigure = [];
@@ -551,7 +554,7 @@ GAMES.tetramino.game = (function ()
      */
     function getRandomFigure() {
         let keys = Object.keys(Game.figures);
-        return Game.figures[keys[getRandomInt(0, (keys.length - 1))]];
+        return [keys[getRandomInt(0, (keys.length - 1))], Game.figures[keys[getRandomInt(0, (keys.length - 1))]]];
     }
 
     /**
@@ -593,7 +596,6 @@ GAMES.tetramino.game = (function ()
         }
 
         gameReset();
-        Game.gameOver = false;
 
         if (!music) {
             _self.Sound.music.play(music);
@@ -615,8 +617,9 @@ GAMES.tetramino.game = (function ()
         document.querySelector('#bucketWrapper table').style.opacity = 1;
         document.querySelector('#gameOver').classList.remove('show');
 
-        Game.countdown = -1;
+        Game.countdown = 3;
         run();
+        Game.gameOver = false;
 
     };
 
@@ -631,6 +634,7 @@ GAMES.tetramino.game = (function ()
 
     let run = function() {
 
+        showTime();
         function frame() {
 
             let stepRatio = (Game.timeRatio * Game.step);
@@ -671,12 +675,12 @@ GAMES.tetramino.game = (function ()
 
 
     function showCountdown() {
+        console.log('xxxx')
         let c = document.querySelector('#countdown');
         if (Game.countdown <= 0) {
             c.innerText = '';
             c.style.display = 'none;'
         } else if (Game.countdown > 0) {
-            console.log(Game.countdown)
             c.innerText = Game.countdown;
         }
         Game.countdown--;
@@ -700,20 +704,23 @@ GAMES.tetramino.game = (function ()
             // установка текущей и следующей фигуры
             if (Game.frame.figureNext.type.length > 0) {
                 Game.frame.figure.type = Game.frame.figureNext.type;
+                Game.frame.figure.code = Game.frame.figureNext.code;
                 Game.frame.figure.cells = {};
                 Game.frame.figure.style = Game.frame.figureNext.style;
             } else {
                 // случайная фигура
                 figure = getRandomFigure();
-                Game.frame.figure.type = figure.type;
+                Game.frame.figure.type = figure[1].type;
+                Game.frame.figure.code = figure[0];
                 Game.frame.figure.cells = {};
-                Game.frame.figure.style = figure.color;
+                Game.frame.figure.style = figure[1].color;
             }
             // случайная следующая фигура
             figure = getRandomFigure();
-            Game.frame.figureNext.type = figure.type;
+            Game.frame.figureNext.type = figure[1].type;
+            Game.frame.figureNext.code = figure[0];
             Game.frame.figureNext.cells = {};
-            Game.frame.figureNext.style = figure.color;
+            Game.frame.figureNext.style = figure[1].color;
 
             clear(opt.bucketNextWrapperId);
             drawElement(opt.bucketNextWrapperId, Game.frame.figureNext.type, getCenter(4, Game.frame.figureNext.type.length), getCenter(5, Game.frame.figureNext.type[0].length), 0, 0, Game.frame.figureNext.style);
@@ -802,26 +809,12 @@ GAMES.tetramino.game = (function ()
      */
     function gameReset() {
 
-        // clear intervals
-        if (Game.interval.main) {
-            clearInterval(Game.interval.main);
-            Game.interval.main = null;
-        }
-        if (Game.interval.timer) {
-            clearInterval(Game.interval.timer);
-            Game.interval.timer = null;
-        }
-        if (Game.interval.pause) {
-            clearInterval(Game.interval.pause);
-            Game.interval.pause = null;
-        }
-
         Game.figures = [];
 
         // reset counter
         Game.count.element = 0;
         Game.count.line = 0;
-        Game.count.timer = 0;
+        Game.count.timer = -1;
         Game.count.score = 0;
         Game.count.level = 1;
 
@@ -846,14 +839,13 @@ GAMES.tetramino.game = (function ()
      * gameOver
      */
     function gameOver() {
-        Game.gameOver = true;
+        Game.pause = true;
         let newHiScore = false;
         if (( localStorage.getItem(opt.highScoreVar) || 0) < Game.count.score ) {
             newHiScore = true;
             localStorage.setItem(opt.highScoreVar, Game.count.score);
         }
         showGameOver(newHiScore,  Game.count.score);
-        gameReset();
     }
 
     _self.pause = function () {
@@ -907,7 +899,8 @@ GAMES.tetramino.game = (function ()
         drawBucket(opt.bucketNextWrapperId, 4, 5);
 
         let modalControls = document.querySelectorAll('.modal .controls .btn, .modal .close');
-        for(let bt of modalControls) {
+        for(let i=0; i< modalControls.length; i++) {
+            let bt = modalControls[i];
             bt.onclick = function() {
                 document.querySelector('body').classList.remove('modal-open');
                 if (!(bt.classList.contains('close')) ) {
@@ -916,8 +909,8 @@ GAMES.tetramino.game = (function ()
                     bt.parentNode.classList.remove('show');
                 }
 
-                if (bt.classList.contains('newGame')) {
-                    _self.newGame('clasic');
+                if (bt.classList.contains('new')) {
+                    _self.newGame('classic');
                     return false;
                 }
 
@@ -1037,7 +1030,7 @@ GAMES.tetramino.game = (function ()
 
     function disableclick(event) {
         if(event.button==2) {
-            return false;
+            //return false;
         }
     }
 
