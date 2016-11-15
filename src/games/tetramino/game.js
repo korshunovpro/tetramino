@@ -620,6 +620,7 @@ GAMES.tetramino.game = (function ()
         Game.countdown = 3;
         run();
         Game.gameOver = false;
+        Game.pause = false;
 
     };
 

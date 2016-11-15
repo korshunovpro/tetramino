@@ -491,7 +491,6 @@ img.logo {
 
 .modal .close {
     cursor: pointer;
-    background: rgba(153, 153, 153, 0.5);
     font-size:22px;
     display: block;
     width:24px;
@@ -506,7 +505,6 @@ img.logo {
 }
 
 .modal .close:hover {
-    background: rgba(153, 153, 153, 0.7);
     transition: background 0.3s ease;
 }
 
