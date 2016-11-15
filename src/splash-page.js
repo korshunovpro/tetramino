@@ -33,7 +33,6 @@ AZSplashScreen = (function () {
                                 setTimeout(function () {
                                     splash.style.display = 'none';
                                     document.querySelector('body').classList.toggle('splash');
-                                    document.querySelector('body').classList.toggle('start');
                                     if (typeof callback === 'function') {
                                         callback();
                                     }

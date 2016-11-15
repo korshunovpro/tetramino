@@ -132,7 +132,7 @@ GAMES.tetramino.game = (function ()
      * @param col
      * @returns {boolean}
      */
-    function drawBucket(bucketWrapperId, row, col) {
+    _self.drawBucket = function (bucketWrapperId, row, col) {
         if (bucketWrapperId) {
             Game.fill[bucketWrapperId] = [];
             buckets[bucketWrapperId] = document.createElement('table');
@@ -144,7 +144,7 @@ GAMES.tetramino.game = (function ()
             return true;
         }
         return false;
-    }
+    };
 
     /**
      * Добавляет линию в таблицу, перед первым элементом
@@ -372,6 +372,10 @@ GAMES.tetramino.game = (function ()
         }
         return cells;
     }
+
+    _self.drawLetter = function(bucketWrapperId, figure, row, col, offsetRow, offsetCol, style) {
+        drawElement(bucketWrapperId, figure, row, col, offsetRow, offsetCol, style);
+    };
 
     /**
      *
@@ -896,8 +900,8 @@ GAMES.tetramino.game = (function ()
             }
         }
 
-        drawBucket(opt.bucketWrapperId, opt.row, opt.col);
-        drawBucket(opt.bucketNextWrapperId, 4, 5);
+        _self.drawBucket(opt.bucketWrapperId, opt.row, opt.col);
+        _self.drawBucket(opt.bucketNextWrapperId, 4, 5);
 
         let modalControls = document.querySelectorAll('.modal .controls .btn, .modal .close');
         for(let i=0; i< modalControls.length; i++) {
@@ -917,6 +921,7 @@ GAMES.tetramino.game = (function ()
 
                 if (bt.classList.contains('goToStart')) {
                     let b = document.querySelector('body');
+                    _self.pause();
                     gameReset();
                     b.classList.add('start');
                     _self.Sound.music.stop(music);
